@@ -66,3 +66,11 @@ header.siteHeader{position:sticky;top:0;z-index:100;background:#fff;border-botto
 #delivery{order:5}
 .advantages{order:6}
 @media(max-width:600px){#homeHero{order:1}#sales{order:2}#categoryHub{order:3}#delivery{order:5}.advantages{order:6}}
+
+/* v16 — visible quantity on product cards */
+.productAction{margin-top:9px}
+.productQty{width:100%;height:38px;background:#181818;color:#fff;border-radius:8px;display:grid;grid-template-columns:42px 1fr 42px;align-items:center;text-align:center;overflow:hidden}
+.productQty button{height:100%;background:transparent;color:#fff;font-size:20px;line-height:1}
+.productQty strong{font-size:13px}
+.productQty button:active{background:#333}
+@media(max-width:600px){.productAction{margin-top:8px}.productQty{height:36px;grid-template-columns:36px 1fr 36px}.productQty button{font-size:18px}.productQty strong{font-size:12px}}

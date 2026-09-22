@@ -93,16 +93,20 @@ function showProducts(rule,title,sub){
   render(list,title,sub);
   $('productsSection').scrollIntoView({behavior:'smooth',block:'start'});
 }
+function cartQty(productIndex){return cart.find(x=>x.product===productIndex)?.qty||0;}
+function productAction(i){const q=cartQty(i);return q?`<div class="productQty"><button type="button" data-product-qty="${i}" data-product-delta="-1">−</button><strong>${q}</strong><button type="button" data-product-qty="${i}" data-product-delta="1">+</button></div>`:`<button type="button" class="add" data-add-index="${i}">Добавить</button>`;}
+function refreshProductControls(){document.querySelectorAll('[data-product-card-index]').forEach(card=>{const i=Number(card.dataset.productCardIndex);const holder=card.querySelector('.productAction');if(holder)holder.innerHTML=productAction(i);});}
 function render(list,title='Популярное',sub='Реальное меню SUSHI HOUSE'){
   $('menuTitle').textContent=title;
   $('menuSubtitle').textContent=`${sub} · ${list.length} ${list.length===1?'позиция':'позиций'}`;
   $('productGrid').innerHTML=list.map(p=>{
     const i=products.indexOf(p);
-    return `<article class="product ${p.available?'':'sold'}"><div class="productImg">${p.emoji}</div><div class="productBody"><h3>${escapeHtml(p.name)}</h3><p>${escapeHtml(p.desc)}</p><div class="meta"><span>${escapeHtml(p.weight||'')}</span><strong class="price">${p.available?money(p.price):'Нет в наличии'}</strong></div>${p.available?`<button type="button" class="add" data-add-index="${i}">Добавить</button>`:`<button type="button" class="add" disabled>Нет в наличии</button>`}</div></article>`;
+    return `<article class="product ${p.available?'':'sold'}" data-product-card-index="${i}"><div class="productImg">${p.emoji}</div><div class="productBody"><h3>${escapeHtml(p.name)}</h3><p>${escapeHtml(p.desc)}</p><div class="meta"><span>${escapeHtml(p.weight||'')}</span><strong class="price">${p.available?money(p.price):'Нет в наличии'}</strong></div><div class="productAction">${p.available?productAction(i):`<button type="button" class="add" disabled>Нет в наличии</button>`}</div></div></article>`;
   }).join('') || '<p class="emptyMenu">В этом разделе пока нет доступных позиций.</p>';
 }
 function addToCart(i){if(!products[i]?.available)return;const x=cart.find(v=>v.product===i);x?x.qty++:cart.push({product:i,qty:1});updateCart();}
 function updateCart(){
+  refreshProductControls();
   const count=cart.reduce((s,x)=>s+x.qty,0),total=cart.reduce((s,x)=>s+products[x.product].price*x.qty,0);
   $('cartCount').textContent=count;$('stickyCount').textContent=count;$('cartTotal').textContent=money(total);$('stickyTotal').textContent=money(total);
   $('cartItems').innerHTML=cart.length?cart.map((x,i)=>{const p=products[x.product];return `<div class="cartItem"><div class="emoji">${p.emoji}</div><div><b>${escapeHtml(p.name)}</b><small>${escapeHtml(p.weight||'')} · ${money(p.price*x.qty)}</small><div class="qty"><button type="button" data-qty-index="${i}" data-qty-delta="-1">−</button><strong>${x.qty}</strong><button type="button" data-qty-index="${i}" data-qty-delta="1">+</button></div></div><button type="button" class="remove" data-remove-index="${i}">×</button></div>`}).join(''):'<p style="color:#777">Корзина пока пустая. Выберите что-нибудь вкусное 🍣</p>';
@@ -120,7 +124,7 @@ function checkout(){alert('Оформление заказа подключим 
 function bindEvents(){
   $('categoryGrid').addEventListener('click',e=>{const card=e.target.closest('[data-category-id]');if(!card)return;e.preventDefault();openCategory(card.dataset.categoryId);});
   $('subcategoryGrid').addEventListener('click',e=>{const btn=e.target.closest('[data-sub-index]');if(!btn)return;e.preventDefault();const parent=findCategory(btn.dataset.parentId);const sub=parent?.children?.[Number(btn.dataset.subIndex)];if(sub)showProducts(sub.filter||sub.test,sub.title,sub.sub);});
-  $('productGrid').addEventListener('click',e=>{const btn=e.target.closest('[data-add-index]');if(btn)addToCart(Number(btn.dataset.addIndex));});
+  $('productGrid').addEventListener('click',e=>{const add=e.target.closest('[data-add-index]');if(add){addToCart(Number(add.dataset.addIndex));return;}const q=e.target.closest('[data-product-qty]');if(q){const i=Number(q.dataset.productQty),d=Number(q.dataset.productDelta);if(d>0)addToCart(i);else{const x=cart.find(v=>v.product===i);if(x){x.qty--;if(x.qty<1)cart.splice(cart.indexOf(x),1);updateCart();}}}});
   $('cartItems').addEventListener('click',e=>{const q=e.target.closest('[data-qty-index]');if(q)qty(Number(q.dataset.qtyIndex),Number(q.dataset.qtyDelta));const r=e.target.closest('[data-remove-index]');if(r)removeItem(Number(r.dataset.removeIndex));});
   $('backToCategories').addEventListener('click',backToCategories);
   $('showAllButton').addEventListener('click',showAll);
