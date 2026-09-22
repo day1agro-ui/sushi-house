@@ -4,19 +4,71 @@ let cart=[];
 const $=id=>document.getElementById(id);
 const money=n=>n.toLocaleString('ru-RU')+' ₽';
 
-const categoryOrder=['Популярное','Сеты','Суши','Роллы с лососем','Роллы с копченым угрем','Роллы с креветкой','Роллы с крабовым мясом','Роллы с куриным филе','Роллы вегетарианские','Запечённые роллы','Горячие роллы','Супы','Салаты','Горячие блюда','Закуски','Пицца','Десерты','Сопутствующие товары'];
-function render(list=products.filter(p=>p.available&&(['Филадельфия','Мини сет','Том-ям PREMIUM','Поке с лососем','Лава','Дракон'].includes(p.name))),title='Популярное',sub='Реальное меню SUSHI HOUSE'){
+const MENU_TREE=[
+  {id:'popular',title:'Популярное',sub:'То, что выбирают чаще всего',icon:'★',tone:'red',direct:true,filter:'popular'},
+  {id:'sets',title:'Сеты',sub:'Выгодные наборы',icon:'🍱',direct:true,filter:'Сеты'},
+  {id:'sushi',title:'Суши',sub:'Классика из риса и рыбы',icon:'🍣',children:[{id:'classic-sushi',title:'Классические суши',sub:'Сяке · Эби · Унаги',icon:'🍣',filter:'Суши'}]},
+  {id:'rolls',title:'Роллы',sub:'Выберите начинку',icon:'🥢',children:[
+    {id:'salmon',title:'С лососем',sub:'Филадельфия и другие',icon:'🐟',filter:'Роллы с лососем'},
+    {id:'eel',title:'С угрём',sub:'Унаги и роллы',icon:'🍣',filter:'Роллы с копченым угрем'},
+    {id:'shrimp',title:'С креветкой',sub:'Эби и темпура',icon:'🍤',filter:'Роллы с креветкой'},
+    {id:'crab',title:'С крабом',sub:'Калифорния и другие',icon:'🦀',filter:'Роллы с крабовым мясом'},
+    {id:'chicken',title:'С курицей',sub:'Сытные роллы',icon:'🍗',filter:'Роллы с куриным филе'},
+    {id:'veg',title:'Вегетарианские',sub:'Без мяса и рыбы',icon:'🥑',filter:'Роллы вегетарианские'}
+  ]},
+  {id:'hot-rolls',title:'Горячие роллы',sub:'Темпура и хруст',icon:'🔥',children:[
+    {id:'baked',title:'Запечённые',sub:'Горячие из печи',icon:'🔥',filter:'Запечённые роллы'},
+    {id:'tempura',title:'Темпура',sub:'Хрустящие роллы',icon:'♨️',filter:'Горячие роллы'}
+  ]},
+  {id:'soups',title:'Супы',sub:'Том-ям, том-кха и рамен',icon:'🥣',children:[
+    {id:'tom-yam',title:'Том-Ям',sub:'Креветки · морепродукты · курица',icon:'🥣',filter:'Супы'},
+    {id:'other-soups',title:'Том-Кха и Рамен',sub:'Ещё горячие супы',icon:'🍜',filter:'Супы'}
+  ]},
+  {id:'salads',title:'Салаты и поке',sub:'Лёгкие и сытные',icon:'🥗',direct:true,filter:'Салаты'},
+  {id:'hot',title:'WOK и горячее',sub:'Лапша, рис и терияки',icon:'🍜',direct:true,filter:'Горячие блюда'},
+  {id:'snacks',title:'Закуски',sub:'Дополнения к заказу',icon:'🍤',direct:true,filter:'Закуски'},
+  {id:'pizza',title:'Пицца',sub:'Горячая и сытная',icon:'🍕',direct:true,filter:'Пицца'},
+  {id:'desserts',title:'Десерты',sub:'Сладкое к заказу',icon:'🍰',direct:true,filter:'Десерты'},
+  {id:'extras',title:'Дополнительно',sub:'Соусы и палочки',icon:'🥢',direct:true,filter:'Сопутствующие товары'}
+];
+
+function findCategory(id){
+  for(const c of MENU_TREE){ if(c.id===id)return c; if(c.children){const x=c.children.find(s=>s.id===id); if(x)return x;} }
+}
+function categoryCount(filter){return filter==='popular'?products.filter(p=>p.available).length:products.filter(p=>p.cat===filter).length}
+function renderCategoryGrid(){
+  $('categoryGrid').innerHTML=MENU_TREE.map(c=>`<button class="categoryTile ${c.tone||''}" onclick="openCategory('${c.id}')"><span class="tileIcon">${c.icon}</span><strong>${c.title}</strong><small>${c.sub}</small><em>${categoryCount(c.filter)} позиций</em><span class="tileArrow">→</span></button>`).join('');
+}
+function openCategory(id){
+  const c=findCategory(id); if(!c)return;
+  if(c.direct){showProducts(c.filter,c.title,c.sub);return;}
+  $('menuHub').hidden=true;$('menuView').hidden=false;$('productsSection').hidden=true;
+  $('menuViewTitle').textContent=c.title;$('menuViewSubtitle').textContent=c.sub;
+  $('subcategoryGrid').innerHTML=c.children.map(s=>`<button class="subcategoryTile" onclick="showProducts('${s.filter}','${s.title}','${s.sub}')"><span>${s.icon}</span><div><strong>${s.title}</strong><small>${s.sub}</small><em>${categoryCount(s.filter)} позиций</em></div><b>→</b></button>`).join('');
+  $('menuView').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function backToCategories(){
+  $('menuView').hidden=true;$('productsSection').hidden=true;$('menuHub').hidden=false;
+  $('menuHub').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function showProducts(filter,title,sub){
+  $('menuHub').hidden=true;$('menuView').hidden=true;$('productsSection').hidden=false;
+  let list=filter==='popular'?products.filter(p=>p.available):products.filter(p=>p.cat===filter);
+  render(list,title,sub);
+  $('productsSection').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function render(list=[],title='Популярное',sub='Реальное меню SUSHI HOUSE'){
   $('menuTitle').textContent=title;$('menuSubtitle').textContent=sub;
-  $('productGrid').innerHTML=list.map(p=>{const i=products.indexOf(p);return `<article class="product ${p.available?'':'sold'}"><div class="productImg">${p.emoji}</div><div class="productBody"><h3>${p.name}</h3><p>${p.desc}</p><div class="meta"><span>${p.weight}</span><strong class="price">${p.available?money(p.price):'Нет в наличии'}</strong></div>${p.available?`<button class="add" onclick="addToCart(${i})">Добавить</button>`:`<button class="add" disabled>Нет в наличии</button>`}</div></article>`}).join('');
+  $('productGrid').innerHTML=list.map(p=>{const i=products.indexOf(p);return `<article class="product ${p.available?'':'sold'}"><div class="productImg">${p.emoji}</div><div class="productBody"><h3>${p.name}</h3><p>${p.desc}</p><div class="meta"><span>${p.weight||' '}</span><strong class="price">${p.available?money(p.price):'Нет в наличии'}</strong></div>${p.available?`<button class="add" onclick="addToCart(${i})">Добавить</button>`:`<button class="add" disabled>Нет в наличии</button>`}</div></article>`}).join('');
 }
 function addToCart(i){if(!products[i].available)return;let x=cart.find(v=>v.product===i);x?x.qty++:cart.push({product:i,qty:1});updateCart()}
-function updateCart(){let count=cart.reduce((s,x)=>s+x.qty,0),total=cart.reduce((s,x)=>s+products[x.product].price*x.qty,0);$('cartCount').textContent=count;$('stickyCount').textContent=count;$('cartTotal').textContent=money(total);$('stickyTotal').textContent=money(total);$('cartItems').innerHTML=cart.length?cart.map((x,i)=>{let p=products[x.product];return `<div class="cartItem"><div class="emoji">${p.emoji}</div><div><b>${p.name}</b><small>${p.weight} · ${money(p.price*x.qty)}</small><div class="qty"><button onclick="qty(${i},-1)">−</button><strong>${x.qty}</strong><button onclick="qty(${i},1)">+</button></div></div><button class="remove" onclick="removeItem(${i})">×</button></div>`}).join(''):'<p style="color:#777">Корзина пока пустая. Выберите что-нибудь вкусное 🍣</p>'}
+function updateCart(){let count=cart.reduce((s,x)=>s+x.qty,0),total=cart.reduce((s,x)=>s+products[x.product].price*x.qty,0);$('cartCount').textContent=count;$('stickyCount').textContent=count;$('cartTotal').textContent=money(total);$('stickyTotal').textContent=money(total);$('cartItems').innerHTML=cart.length?cart.map((x,i)=>{let p=products[x.product];return `<div class="cartItem"><div class="emoji">${p.emoji}</div><div><b>${p.name}</b><small>${p.weight||''} · ${money(p.price*x.qty)}</small><div class="qty"><button onclick="qty(${i},-1)">−</button><strong>${x.qty}</strong><button onclick="qty(${i},1)">+</button></div></div><button class="remove" onclick="removeItem(${i})">×</button></div>`}).join(''):'<p style="color:#777">Корзина пока пустая. Выберите что-нибудь вкусное 🍣</p>'}
 function qty(i,d){cart[i].qty+=d;if(cart[i].qty<1)cart.splice(i,1);updateCart()}
 function removeItem(i){cart.splice(i,1);updateCart()}
 function openCart(){$('cartOverlay').classList.add('open');updateCart()}
 function closeCart(e){if(!e||e.target===$('cartOverlay'))$('cartOverlay').classList.remove('open')}
-function filterCategory(cat){document.querySelectorAll('.cat').forEach(x=>x.classList.toggle('active',x.dataset.cat===cat));if(cat==='Популярное')render();else render(products.filter(p=>p.cat===cat),cat,`Меню: ${cat}`);$('menu').scrollIntoView({behavior:'smooth'})}
-function showAll(){document.querySelectorAll('.cat').forEach(x=>x.classList.remove('active'));render(products.filter(p=>p.available),'Всё меню','Все доступные блюда SUSHI HOUSE')}
+function filterCategory(cat){const map={'Сеты':'sets','Суши':'sushi','Роллы':'rolls','WOK':'hot','Том-Ям':'soups'};openCategory(map[cat]||cat)}
+function showAll(){showProducts('popular','Всё меню','Все доступные блюда SUSHI HOUSE')}
 function scrollToMenu(){$('menu').scrollIntoView({behavior:'smooth'})}
 function toggleMenu(){$('mobileMenu').classList.toggle('open')}
-document.addEventListener('DOMContentLoaded',()=>{render();updateCart();document.querySelectorAll('.cat').forEach(b=>b.onclick=()=>filterCategory(b.dataset.cat))});
+document.addEventListener('DOMContentLoaded',()=>{renderCategoryGrid();updateCart();});

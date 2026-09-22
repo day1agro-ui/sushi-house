@@ -1,23 +1,15 @@
 <!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SUSHI HOUSE — Роллы, WOK, Том-Ям</title><meta name="description" content="SUSHI HOUSE — роллы, сеты, WOK, том-ям и закуски с доставкой."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="styles.css"></head><body>
 <header><div class="container nav"><a class="brand" href="#top"><small>РОЛЛЫ · WOK · ТОМ-ЯМ</small><b>SUSHI HOUSE</b></a><nav><a href="#menu">Меню</a><a href="#sales">Акции</a><a href="#delivery">Доставка</a><a href="#contacts">Контакты</a></nav><div class="city">⌖ Новосибирск · <strong>+7 999 462-78-91</strong></div><button class="cartTop" onclick="openCart()">🛒 <span>Заказать</span> <b id="cartCount">0</b></button><button class="burger" onclick="toggleMenu()">☰</button></div></header>
-<main id="top"><section class="hero"><div class="container heroGrid"><div><span class="kicker">СВЕЖЕЕ · БЫСТРОЕ · ВКУСНОЕ</span><h1>СУШИ, КОТОРЫЕ<br><strong>ХОЧЕТСЯ ПОВТОРИТЬ</strong></h1><p>Роллы, сеты, WOK и горячие блюда. Собираем заказ аккуратно и привозим прямо к вам.</p><div class="heroBtns"><button class="red" onclick="scrollToMenu()">Выбрать блюда →</button><button class="darkBtn" onclick="filterCategory('Сеты')">🔥 Сеты выгоднее</button></div><div class="stats"><div><b>60 мин</b><small>ориентир доставки</small></div><div><b>от 500 ₽</b><small>порог доставки</small></div><div><b>ежедневно</b><small>работаем ежедневно</small></div></div></div><div class="heroArt"><span>🍣</span><i>🍤</i><em>HOUSE<br>FAVORITES</em></div></div></section>
-<section class="container cats" id="menu">
-<button class="cat active" data-cat="Популярное">★<b>Популярное</b><small>Выбор гостей</small></button>
-<button class="cat" data-cat="Сеты">🍱<b>Сеты</b><small>Выгодные наборы</small></button>
-<button class="cat" data-cat="Суши">🍣<b>Суши</b><small>Классика</small></button>
-<button class="cat" data-cat="Роллы с лососем">🐟<b>Лосось</b><small>Роллы</small></button>
-<button class="cat" data-cat="Роллы с копченым угрем">🍣<b>Угорь</b><small>Роллы</small></button>
-<button class="cat" data-cat="Роллы с креветкой">🍤<b>Креветка</b><small>Роллы</small></button>
-<button class="cat" data-cat="Запечённые роллы">🔥<b>Запечённые</b><small>Роллы</small></button>
-<button class="cat" data-cat="Горячие роллы">♨️<b>Горячие</b><small>Роллы</small></button>
-<button class="cat" data-cat="Супы">🥣<b>Супы</b><small>Том-ям</small></button>
-<button class="cat" data-cat="Салаты">🥗<b>Салаты</b><small>Поке</small></button>
-<button class="cat" data-cat="Горячие блюда">🍜<b>WOK</b><small>Горячее</small></button>
-<button class="cat" data-cat="Закуски">🍟<b>Закуски</b><small>К заказу</small></button>
-<button class="cat" data-cat="Пицца">🍕<b>Пицца</b><small>Горячая</small></button>
-<button class="cat" data-cat="Десерты">🍰<b>Десерты</b><small>Сладкое</small></button>
+<main id="top"><section class="hero"><div class="container heroGrid"><div><span class="kicker">СВЕЖЕЕ · БЫСТРОЕ · ВКУСНОЕ</span><h1>СУШИ, КОТОРЫЕ<br><strong>ХОЧЕТСЯ ПОВТОРИТЬ</strong></h1><p>Роллы, сеты, WOK и горячие блюда. Собираем заказ аккуратно и привозим прямо к вам.</p><div class="heroBtns"><button class="red" onclick="scrollToMenu()">Выбрать блюда →</button><button class="darkBtn" onclick="openCategory('sets')">🔥 Сеты выгоднее</button></div><div class="stats"><div><b>60 мин</b><small>ориентир доставки</small></div><div><b>от 500 ₽</b><small>порог доставки</small></div><div><b>ежедневно</b><small>работаем ежедневно</small></div></div></div><div class="heroArt"><span>🍣</span><i>🍤</i><em>HOUSE<br>FAVORITES</em></div></div></section>
+<section class="container menuHub" id="menu">
+  <div class="menuIntro"><div><span class="kicker dark">МЕНЮ</span><h2>Выберите, что хочется сегодня</h2><p>Всё меню SUSHI HOUSE собрано по понятным разделам.</p></div></div>
+  <div class="categoryGrid" id="categoryGrid"></div>
 </section>
-<section class="container products"><div class="head"><div><span class="kicker dark">MENU</span><h2 id="menuTitle">Популярное</h2><p id="menuSubtitle">То, что чаще всего выбирают наши гости</p></div><button class="link" onclick="showAll()">Всё меню →</button></div><div class="grid" id="productGrid"></div></section>
+<section class="container menuView" id="menuView" hidden>
+  <div class="menuViewHead"><button class="backBtn" onclick="backToCategories()">← Все категории</button><div><span class="kicker dark">РАЗДЕЛ МЕНЮ</span><h2 id="menuViewTitle">Суши</h2><p id="menuViewSubtitle">Выберите категорию</p></div></div>
+  <div class="subcategoryGrid" id="subcategoryGrid"></div>
+</section>
+<section class="container products" id="productsSection" hidden><div class="head"><div><span class="kicker dark">MENU</span><h2 id="menuTitle">Популярное</h2><p id="menuSubtitle">То, что чаще всего выбирают наши гости</p></div><button class="link" onclick="showAll()">Всё меню →</button></div><div class="grid" id="productGrid"></div></section>
 <section class="container promos" id="sales"><article class="promo dark"><div><span class="kicker">HOUSE SETS</span><h2>Сеты<br>выгоднее</h2><p>Любимые сочетания в одном заказе.</p><button class="red" onclick="filterCategory('Сеты')">Смотреть сеты →</button></div><span class="food">🍱</span><b class="sale">до<br>−20%</b></article><article class="promo warm"><div><span class="kicker dark">HOT & SPICY</span><h2>Горячее<br>на вечер</h2><p>WOK и Том-Ям — когда хочется насыщенного вкуса.</p><button class="red" onclick="filterCategory('WOK')">Смотреть WOK →</button></div><span class="food">🍜</span></article></section>
 <section class="container delivery" id="delivery"><span class="kicker dark">HOW IT WORKS</span><h2>Заказ без лишних шагов</h2><div class="steps"><div><i>01</i><b>Выберите</b><small>Соберите блюда в корзину</small></div><div><i>02</i><b>Оформите</b><small>Оставьте контакты и адрес</small></div><div><i>03</i><b>Получите</b><small>Мы приготовим и привезём</small></div></div></section>
 <section class="container advantages"><div>✓ <b>Свежие ингредиенты</b><small>Готовим под заказ</small></div><div>⌁ <b>Быстрая доставка</b><small>Ориентир от 60 минут</small></div><div>₽ <b>Удобная оплата</b><small>Онлайн или при получении</small></div><div>♡ <b>Контроль качества</b><small>Упаковываем аккуратно</small></div></section></main>
