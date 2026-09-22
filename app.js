@@ -101,7 +101,7 @@ function render(list,title='Популярное',sub='Реальное меню
   $('menuSubtitle').textContent=`${sub} · ${list.length} ${list.length===1?'позиция':'позиций'}`;
   $('productGrid').innerHTML=list.map(p=>{
     const i=products.indexOf(p);
-    return `<article class="product ${p.available?'':'sold'}" data-product-card-index="${i}"><div class="productImg">${p.emoji}</div><div class="productBody"><h3>${escapeHtml(p.name)}</h3><p>${escapeHtml(p.desc)}</p><div class="meta"><span>${escapeHtml(p.weight||'')}</span><strong class="price">${p.available?money(p.price):'Нет в наличии'}</strong></div><div class="productAction">${p.available?productAction(i):`<button type="button" class="add" disabled>Нет в наличии</button>`}</div></div></article>`;
+    return `<article class="product ${p.available?'':'sold'}" data-product-card-index="${i}"><div class="productImg">${p.image ? `<img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" loading="lazy" decoding="async">` : p.emoji}</div><div class="productBody"><h3>${escapeHtml(p.name)}</h3><p>${escapeHtml(p.desc)}</p><div class="meta"><span>${escapeHtml(p.weight||'')}</span><strong class="price">${p.available?money(p.price):'Нет в наличии'}</strong></div><div class="productAction">${p.available?productAction(i):`<button type="button" class="add" disabled>Нет в наличии</button>`}</div></div></article>`;
   }).join('') || '<p class="emptyMenu">В этом разделе пока нет доступных позиций.</p>';
 }
 function addToCart(i){if(!products[i]?.available)return;const x=cart.find(v=>v.product===i);x?x.qty++:cart.push({product:i,qty:1});updateCart();}
@@ -109,7 +109,7 @@ function updateCart(){
   refreshProductControls();
   const count=cart.reduce((s,x)=>s+x.qty,0),total=cart.reduce((s,x)=>s+products[x.product].price*x.qty,0);
   $('cartCount').textContent=count;$('stickyCount').textContent=count;$('cartTotal').textContent=money(total);$('stickyTotal').textContent=money(total);
-  $('cartItems').innerHTML=cart.length?cart.map((x,i)=>{const p=products[x.product];return `<div class="cartItem"><div class="emoji">${p.emoji}</div><div><b>${escapeHtml(p.name)}</b><small>${escapeHtml(p.weight||'')} · ${money(p.price*x.qty)}</small><div class="qty"><button type="button" data-qty-index="${i}" data-qty-delta="-1">−</button><strong>${x.qty}</strong><button type="button" data-qty-index="${i}" data-qty-delta="1">+</button></div></div><button type="button" class="remove" data-remove-index="${i}">×</button></div>`}).join(''):'<p style="color:#777">Корзина пока пустая. Выберите что-нибудь вкусное 🍣</p>';
+  $('cartItems').innerHTML=cart.length?cart.map((x,i)=>{const p=products[x.product];return `<div class="cartItem"><div class="emoji">${p.image ? `<img src="${escapeHtml(p.image)}" alt="" loading="lazy" decoding="async">` : p.emoji}</div><div><b>${escapeHtml(p.name)}</b><small>${escapeHtml(p.weight||'')} · ${money(p.price*x.qty)}</small><div class="qty"><button type="button" data-qty-index="${i}" data-qty-delta="-1">−</button><strong>${x.qty}</strong><button type="button" data-qty-index="${i}" data-qty-delta="1">+</button></div></div><button type="button" class="remove" data-remove-index="${i}">×</button></div>`}).join(''):'<p style="color:#777">Корзина пока пустая. Выберите что-нибудь вкусное 🍣</p>';
 }
 function qty(i,d){if(!cart[i])return;cart[i].qty+=d;if(cart[i].qty<1)cart.splice(i,1);updateCart();}
 function removeItem(i){cart.splice(i,1);updateCart();}
