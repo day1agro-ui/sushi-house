@@ -1,4 +1,4 @@
-# SUSHI HOUSE v12
+# SUSHI HOUSE v13
 
 Mobile-first SUSHI HOUSE landing page.
 
@@ -13,3 +13,6 @@ Mobile-first SUSHI HOUSE landing page.
 8. Advantages
 9. Footer
 10. Sticky cart
+
+
+Layout order: header → hero → House Sets / Hot & Spicy → menu → categories → how it works → advantages → footer → sticky cart.

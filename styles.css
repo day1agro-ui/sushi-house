@@ -56,14 +56,13 @@ header.siteHeader{position:sticky;top:0;z-index:100;background:#fff;border-botto
 }
 
 
-/* v11 — guaranteed landing order: header → dark hero → menu */
+/* v12 — landing order: hero → promos → menu → ordering flow */
 .siteMain{display:flex;flex-direction:column}
 #homeHero{order:1}
-#categoryHub{order:2}
-#menuView{order:3}
+#sales{order:2}
+#categoryHub{order:3}
+#menuView{order:4}
 #productsSection{order:4}
-#sales{order:5}
-#delivery{order:6}
-.advantages{order:7}
-.siteMain > #homeHero + #categoryHub{display:block}
-@media(max-width:600px){#homeHero{order:1}#categoryHub{order:2}}
+#delivery{order:5}
+.advantages{order:6}
+@media(max-width:600px){#homeHero{order:1}#sales{order:2}#categoryHub{order:3}#delivery{order:5}.advantages{order:6}}
