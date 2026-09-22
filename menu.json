@@ -195,8 +195,8 @@
       "available": true,
       "emoji": "🍣",
       "source": "sushihouse-nsk.ru",
-      "image": null,
-      "image_original": null
+      "image": "assets/menu/processed/philadelphia.webp",
+      "image_original": "manual-test/generated/philadelphia-source.jpeg"
     },
     {
       "id": "sh-016",
