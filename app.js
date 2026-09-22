@@ -71,4 +71,17 @@ function filterCategory(cat){const map={'Сеты':'sets','Суши':'sushi','Р
 function showAll(){showProducts('popular','Всё меню','Все доступные блюда SUSHI HOUSE')}
 function scrollToMenu(){$('menu').scrollIntoView({behavior:'smooth'})}
 function toggleMenu(){$('mobileMenu').classList.toggle('open')}
-document.addEventListener('DOMContentLoaded',()=>{renderCategoryGrid();updateCart();});
+function bindMainCategoryCards(){
+  document.querySelectorAll('.category-card').forEach(card=>{
+    const id=card.dataset.category;
+    const c=findCategory(id);
+    if(!c)return;
+    const countEl=card.querySelector('.category-count');
+    if(countEl) countEl.textContent=`${categoryCount(c.filter)} позиций`;
+    card.addEventListener('click',()=>openCategory(id));
+  });
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  bindMainCategoryCards();
+  updateCart();
+});

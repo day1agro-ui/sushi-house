@@ -7,48 +7,45 @@
   <p class="category-lead">Выберите раздел — внутри всё аккуратно разбито по блюдам.</p>
 
   <div class="category-grid">
-    <button class="category-card" data-category="Суши">
+    <button class="category-card" data-category="sushi">
       <span class="category-icon">🍣</span><strong>Суши</strong><small>Классические и с начинками</small>
-    </button>
-    <button class="category-card" data-category="Сеты">
+    <em class="category-count"></em></button>
+    <button class="category-card" data-category="sets">
       <span class="category-icon">🍱</span><strong>Сеты</strong><small>Выгодные наборы</small>
-    </button>
-    <button class="category-card" data-category="Роллы">
+    <em class="category-count"></em></button>
+    <button class="category-card" data-category="rolls">
       <span class="category-icon">🥢</span><strong>Роллы</strong><small>Лосось, угорь, креветка и другие</small>
-    </button>
-    <button class="category-card" data-category="Запечённые">
+    <em class="category-count"></em></button>
+    <button class="category-card" data-category="baked">
       <span class="category-icon">🔥</span><strong>Запечённые</strong><small>Горячие и сытные роллы</small>
-    </button>
-    <button class="category-card" data-category="Горячие роллы">
+    <em class="category-count"></em></button>
+    <button class="category-card" data-category="hot-rolls">
       <span class="category-icon">⚡</span><strong>Горячие роллы</strong><small>Темпура и горячая подача</small>
-    </button>
-    <button class="category-card" data-category="WOK">
+    <em class="category-count"></em></button>
+    <button class="category-card" data-category="hot">
       <span class="category-icon">🍜</span><strong>WOK</strong><small>Горячая лапша по-азиатски</small>
-    </button>
-    <button class="category-card" data-category="Супы">
+    <em class="category-count"></em></button>
+    <button class="category-card" data-category="soups">
       <span class="category-icon">🥣</span><strong>Супы</strong><small>Том-Ям, Том-Кха и рамен</small>
-    </button>
-    <button class="category-card" data-category="Салаты">
+    <em class="category-count"></em></button>
+    <button class="category-card" data-category="salads">
       <span class="category-icon">🥗</span><strong>Салаты</strong><small>Свежие и лёгкие</small>
-    </button>
-    <button class="category-card" data-category="Горячие блюда">
+    <em class="category-count"></em></button>
+    <button class="category-card" data-category="hot">
       <span class="category-icon">🍛</span><strong>Горячие блюда</strong><small>Полноценные блюда</small>
-    </button>
-    <button class="category-card" data-category="Закуски">
+    <em class="category-count"></em></button>
+    <button class="category-card" data-category="snacks">
       <span class="category-icon">🍤</span><strong>Закуски</strong><small>Для компании и перекуса</small>
-    </button>
-    <button class="category-card" data-category="Пицца">
+    <em class="category-count"></em></button>
+    <button class="category-card" data-category="pizza">
       <span class="category-icon">🍕</span><strong>Пицца</strong><small>Классические вкусы</small>
-    </button>
-    <button class="category-card" data-category="Десерты">
+    <em class="category-count"></em></button>
+    <button class="category-card" data-category="desserts">
       <span class="category-icon">🍰</span><strong>Десерты</strong><small>Сладкое к заказу</small>
-    </button>
-    <button class="category-card" data-category="Напитки">
-      <span class="category-icon">🥤</span><strong>Напитки</strong><small>Освежиться</small>
-    </button>
-    <button class="category-card" data-category="Дополнительно">
-      <span class="category-icon">➕</span><strong>Дополнительно</strong><small>Соусы, имбирь, васаби</small>
-    </button>
+    <em class="category-count"></em></button>
+    <button class="category-card" data-category="extras">
+      <span class="category-icon">🥤</span><strong>Дополнительно</strong><small>Соусы, имбирь, васаби и палочки</small>
+    <em class="category-count"></em></button>
   </div>
 </section>
 <main id="top"><section class="hero"><div class="container heroGrid"><div><span class="kicker">СВЕЖЕЕ · БЫСТРОЕ · ВКУСНОЕ</span><h1>СУШИ, КОТОРЫЕ<br><strong>ХОЧЕТСЯ ПОВТОРИТЬ</strong></h1><p>Роллы, сеты, WOK и горячие блюда. Собираем заказ аккуратно и привозим прямо к вам.</p><div class="heroBtns"><button class="red" onclick="scrollToMenu()">Выбрать блюда →</button><button class="darkBtn" onclick="openCategory('sets')">🔥 Сеты выгоднее</button></div><div class="stats"><div><b>60 мин</b><small>ориентир доставки</small></div><div><b>от 500 ₽</b><small>порог доставки</small></div><div><b>ежедневно</b><small>работаем ежедневно</small></div></div></div><div class="heroArt"><span>🍣</span><i>🍤</i><em>HOUSE<br>FAVORITES</em></div></div></section>
@@ -57,7 +54,8 @@
   
 </section>
 <section class="container menuView" id="menuView" hidden>
-  <div class="menuViewHead"><button class="backBtn" onclick="backToCategories()">← Все категории</button><div><span class="kicker dark">РАЗДЕЛ МЕНЮ</span><h2 id="menuViewTitle">Суши</h2><p id="menuViewSubtitle">Выберите категорию</p></div></div>
+  <div class="menuViewHead"><button class="backBtn" onclick="backToCategories()">← Все категории</button><div><span class="kicker dark">РАЗДЕЛ МЕНЮ</span><h2 id="menuViewTitle">Суши</h2><p id="menuViewSubtitle">Выберите категорию</p></div><div class="subcategoryGrid" id="subcategoryGrid"></div>
+  </div>
   
 </section>
 <section class="container products" id="productsSection" hidden><div class="head"><div><span class="kicker dark">MENU</span><h2 id="menuTitle">Популярное</h2><p id="menuSubtitle">То, что чаще всего выбирают наши гости</p></div><button class="link" onclick="showAll()">Всё меню →</button></div><div class="grid" id="productGrid"></div></section>
@@ -85,32 +83,62 @@
  .category-card{min-height:155px;padding:22px}
 }
 </style>
-<script>
-(function(){
-  function goCategory(category){
-    var target = document.querySelector('[data-menu-category="'+CSS.escape(category)+'"]');
-    if(target){ target.scrollIntoView({behavior:'smooth',block:'start'}); return; }
 
-    var all = document.querySelectorAll('[data-category], [data-cat], .menu-section, section');
-    for(var i=0;i<all.length;i++){
-      var el=all[i];
-      var txt=(el.getAttribute('data-category')||el.getAttribute('data-cat')||el.textContent||'').trim();
-      if(txt===category || txt.indexOf(category)>=0){
-        el.scrollIntoView({behavior:'smooth',block:'start'});
-        return;
-      }
-    }
-    // Fall back to the menu area and let the existing category/menu logic handle the view.
-    var menu=document.querySelector('#menu, .menu, [class*="menu-section"]');
-    if(menu) menu.scrollIntoView({behavior:'smooth',block:'start'});
-  }
-  document.addEventListener('click',function(e){
-    var card=e.target.closest('.category-card');
-    if(!card)return;
-    e.preventDefault();
-    goCategory(card.getAttribute('data-category'));
-  });
-})();
-</script>
+
+
+<style>
+.main-menu-categories{padding:28px 20px 24px;max-width:1100px;margin:0 auto}
+.section-kicker{font-size:12px;letter-spacing:.18em;color:#999;font-weight:800;margin-bottom:6px}
+.main-menu-categories h2{font-size:32px;line-height:1.05;margin:0 0 7px}
+.category-lead{margin:0 0 20px;color:#777;font-size:15px}
+.category-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.category-card{appearance:none;text-align:left;border:1px solid #e9e9e9;background:#fff;border-radius:20px;padding:18px 15px;min-height:145px;box-shadow:0 8px 24px rgba(0,0,0,.055);cursor:pointer;transition:.18s}
+.category-card:active{transform:scale(.98)}
+.category-icon{display:block;font-size:34px;line-height:1;margin-bottom:17px}
+.category-card strong{display:block;font-size:18px;color:#151515;margin-bottom:5px}
+.category-card small{display:block;color:#8a8a8a;font-size:13px;line-height:1.3}
+.menuView{padding-top:10px;padding-bottom:20px}
+.subcategoryGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}
+.subcategoryTile{border:1px solid #e8e8e8;background:#fff;border-radius:18px;padding:16px;text-align:left;min-height:105px;box-shadow:0 6px 20px rgba(0,0,0,.05);display:flex;gap:12px;align-items:center}
+.subcategoryTile>span{font-size:30px}
+.subcategoryTile strong{display:block;font-size:16px;color:#151515}
+.subcategoryTile small{display:block;color:#888;margin-top:4px;font-size:12px;line-height:1.3}
+.subcategoryTile em{display:block;color:#aaa;font-size:11px;font-style:normal;margin-top:7px}
+.subcategoryTile>b{margin-left:auto;font-size:22px}
+@media(min-width:760px){
+ .main-menu-categories{padding-left:28px;padding-right:28px}
+ .category-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+ .category-card{min-height:155px;padding:22px}
+ .subcategoryGrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+</style>
+
+
+<style>
+.main-menu-categories{padding:28px 20px 24px;max-width:1100px;margin:0 auto}
+.section-kicker{font-size:12px;letter-spacing:.18em;color:#999;font-weight:800;margin-bottom:6px}
+.main-menu-categories h2{font-size:32px;line-height:1.05;margin:0 0 7px}
+.category-lead{margin:0 0 20px;color:#777;font-size:15px}
+.category-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.category-card{appearance:none;text-align:left;border:1px solid #e9e9e9;background:#fff;border-radius:20px;padding:18px 15px;min-height:145px;box-shadow:0 8px 24px rgba(0,0,0,.055);cursor:pointer;transition:.18s;position:relative}
+.category-card:active{transform:scale(.98)}
+.category-icon{display:block;font-size:34px;line-height:1;margin-bottom:17px}
+.category-card strong{display:block;font-size:18px;color:#151515;margin-bottom:5px}
+.category-card small{display:block;color:#8a8a8a;font-size:13px;line-height:1.3;padding-right:34px}
+.category-card .category-count{display:block;color:#aaa;font-size:11px;font-style:normal;margin-top:10px}
+.subcategoryGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0 30px}
+.subcategoryTile{border:1px solid #e8e8e8;background:#fff;border-radius:18px;padding:16px;text-align:left;min-height:105px;box-shadow:0 6px 20px rgba(0,0,0,.05);display:flex;gap:12px;align-items:center}
+.subcategoryTile>span{font-size:30px}
+.subcategoryTile strong{display:block;font-size:16px;color:#151515}
+.subcategoryTile small{display:block;color:#888;margin-top:4px;font-size:12px;line-height:1.3}
+.subcategoryTile em{display:block;color:#aaa;font-size:11px;font-style:normal;margin-top:7px}
+.subcategoryTile>b{margin-left:auto;font-size:22px}
+@media(min-width:760px){
+ .main-menu-categories{padding-left:28px;padding-right:28px}
+ .category-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+ .category-card{min-height:155px;padding:22px}
+ .subcategoryGrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+</style>
 
 </body></html>
