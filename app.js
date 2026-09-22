@@ -53,6 +53,26 @@ function treeCount(c){
 }
 function escapeHtml(value){return String(value??'').replace(/[&<>'"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));}
 
+function categoryImage(id){
+  const images={
+    popular:'assets/categories/salmon.webp',
+    sushi:'assets/categories/sushi.webp',
+    sets:'assets/categories/sets.webp',
+    rolls:'assets/categories/salmon.webp',
+    baked:'assets/categories/baked.webp',
+    'hot-rolls':'assets/categories/hot-rolls.webp',
+    wok:'assets/categories/wok.webp',
+    soups:'assets/categories/soups.webp',
+    salads:'assets/categories/salads.webp',
+    'hot-dishes':'assets/categories/hot-dishes.webp',
+    snacks:'assets/categories/snacks.webp',
+    pizza:'assets/categories/pizza.webp',
+    desserts:'assets/categories/desserts.webp',
+    extras:'assets/categories/extras.webp'
+  };
+  return images[id] || 'assets/categories/salmon.webp';
+}
+
 function renderCategoryGrid(){
   const grid=$('categoryGrid');
   if(!grid)return;
