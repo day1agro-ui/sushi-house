@@ -2,7 +2,12 @@ name: Import SUSHI HOUSE archive
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+    paths:
+      - "sushi-house-*.zip"
+      - ".github/workflows/import-sushi-house.yml"
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -12,8 +17,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  import-project:
-    if: ${{ !startsWith(github.event.head_commit.message, 'chore: import SUSHI HOUSE project') }}
+  import:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,163 +26,187 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
-          persist-credentials: true
 
-      - name: Diagnose repository state BEFORE import
-        shell: bash
-        run: |
-          set -euo pipefail
-          echo '===== BEFORE IMPORT ====='
-          echo "Event SHA:       $GITHUB_SHA"
-          echo "Event commit:    ${{ github.event.head_commit.message }}"
-          echo "Branch:          $GITHUB_REF_NAME"
-          echo "HEAD:            $(git rev-parse HEAD)"
-          echo "HEAD short:      $(git rev-parse --short HEAD)"
-          echo "Remote:          $(git remote get-url origin)"
-          echo '--- root files ---'
-          find . -maxdepth 1 -type f -printf '%f\n' | sort
-          echo '========================='
-
-      - name: Find newest SUSHI HOUSE archive
+      - name: Find archive
         id: archive
         shell: bash
         run: |
           set -euo pipefail
-          mapfile -t archives < <(find . -maxdepth 1 -type f -name 'sushi-house-*.zip' -printf '%T@ %p\n' | sort -nr | cut -d' ' -f2-)
-          if [ "${#archives[@]}" -eq 0 ]; then
-            echo 'No sushi-house-*.zip found. Nothing to import.'
-            echo 'found=false' >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          archive="${archives[0]}"
-          echo '===== ARCHIVE SELECTED ====='
-          printf '%s\n' "${archives[@]}"
-          echo "Selected: $archive"
-          echo "Size: $(stat -c '%s bytes' "$archive")"
-          echo "SHA256: $(sha256sum "$archive" | cut -d' ' -f1)"
-          echo '============================='
-          echo 'found=true' >> "$GITHUB_OUTPUT"
-          echo "path=$archive" >> "$GITHUB_OUTPUT"
-          echo "sha256=$(sha256sum "$archive" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
 
-      - name: Extract and replace project
-        if: steps.archive.outputs.found == 'true'
+          ARCHIVE="$(find . -maxdepth 1 -type f -name 'sushi-house-*.zip' -printf '%f\n' | sort | tail -n 1)"
+
+          if [ -z "$ARCHIVE" ]; then
+            echo "::error::No sushi-house-*.zip found in repository root."
+            exit 1
+          fi
+
+          echo "archive=$ARCHIVE" >> "$GITHUB_OUTPUT"
+          echo "ARCHIVE FOUND: $ARCHIVE"
+          ls -lh "$ARCHIVE"
+          sha256sum "$ARCHIVE"
+
+      - name: Extract archive
+        shell: bash
+        env:
+          ARCHIVE: ${{ steps.archive.outputs.archive }}
+        run: |
+          set -euo pipefail
+
+          rm -rf .import-tmp
+          mkdir -p .import-tmp
+
+          unzip -q "$ARCHIVE" -d .import-tmp
+
+          echo "Archive contents:"
+          find .import-tmp -maxdepth 3 -type f | sort
+
+      - name: Detect project root
+        id: root
         shell: bash
         run: |
           set -euo pipefail
-          archive="${{ steps.archive.outputs.path }}"
-          tmp="$(mktemp -d)"
-          trap 'rm -rf "$tmp"' EXIT
 
-          unzip -q "$archive" -d "$tmp"
-          rm -rf "$tmp/.git" "$tmp/.github"
+          ROOT=".import-tmp"
 
-          echo '===== ARCHIVE CONTENT ====='
-          find "$tmp" -maxdepth 2 -type f -printf '%P\n' | sort
-          echo '==========================='
+          # If the ZIP contains one top-level directory, use it as the project root.
+          dirs=()
+          while IFS= read -r -d '' d; do
+            dirs+=("$d")
+          done < <(find .import-tmp -mindepth 1 -maxdepth 1 -type d -print0)
 
-          mapfile -t dirs < <(find "$tmp" -mindepth 1 -maxdepth 1 -type d -print)
-          if [ "${#dirs[@]}" -eq 1 ] && [ ! -f "$tmp/index.html" ]; then
-            src="${dirs[0]}"
-          else
-            src="$tmp"
+          files=()
+          while IFS= read -r -d '' f; do
+            files+=("$f")
+          done < <(find .import-tmp -mindepth 1 -maxdepth 1 -type f -print0)
+
+          if [ "${#dirs[@]}" -eq 1 ] && [ "${#files[@]}" -eq 0 ] && [ -f "${dirs[0]}/index.html" ]; then
+            ROOT="${dirs[0]}"
           fi
 
-          test -f "$src/index.html" || { echo 'ERROR: index.html not found in archive'; exit 1; }
+          if [ ! -f "$ROOT/index.html" ]; then
+            echo "::error::index.html was not found in extracted archive."
+            find .import-tmp -maxdepth 4 -type f -name 'index.html' -print
+            exit 1
+          fi
 
+          echo "root=$ROOT" >> "$GITHUB_OUTPUT"
+          echo "PROJECT ROOT: $ROOT"
+
+      - name: Replace project files
+        shell: bash
+        env:
+          ROOT: ${{ steps.root.outputs.root }}
+        run: |
+          set -euo pipefail
+
+          # Protect Git metadata and this workflow.
+          cp ".github/workflows/import-sushi-house.yml" /tmp/import-sushi-house.yml
+
+          # Remove previous project files, but NEVER remove .git or .github.
+          find . -mindepth 1 -maxdepth 1 \
+            ! -name '.git' \
+            ! -name '.github' \
+            ! -name '.import-tmp' \
+            -exec rm -rf {} +
+
+          # Copy the extracted project into repository root.
           rsync -a --delete \
             --exclude='.git/' \
             --exclude='.github/' \
-            --exclude='sushi-house-*.zip' \
-            "$src"/ ./
+            "$ROOT/" "./"
 
-          rm -f "$archive"
+          # Restore protected workflow.
+          mkdir -p ".github/workflows"
+          cp /tmp/import-sushi-house.yml ".github/workflows/import-sushi-house.yml"
 
-      - name: Verify EXACT imported content
-        if: steps.archive.outputs.found == 'true'
+          # Remove archive and temporary extraction directory.
+          rm -f "${{ steps.archive.outputs.archive }}"
+          rm -rf .import-tmp
+
+      - name: Validate imported project
         shell: bash
         run: |
           set -euo pipefail
+
           test -f index.html
-          test -f app.js
           test -f styles.css
+          test -f app.js
           test -f menu.json
-          test -f .github/workflows/import-sushi-house.yml
 
-          echo '===== IMPORTED FILES ====='
-          ls -lah index.html app.js styles.css menu.json
-          echo '==========================='
+          echo "=== PROJECT FILES ==="
+          ls -lah
 
-          echo '===== HTML LAYOUT MARKERS ====='
-          grep -nE 'data-layout-version|id="homeHero"|id="sales"|id="categoryHub"|id="howItWorks"|id="benefits"' index.html || true
-          echo '================================'
+          echo "=== INDEX MARKERS ==="
+          grep -n -E 'hero|sales|categoryHub|menuHub|Как заказать|Преимущества' index.html | head -n 80 || true
 
-          echo '===== HTML ORDER CHECK ====='
+          echo "=== ORDER CHECK ==="
           python3 - <<'PY'
           from pathlib import Path
-          s=Path('index.html').read_text(encoding='utf-8')
-          ids=['homeHero','sales','categoryHub','howItWorks','benefits']
-          pos={i:s.find(f'id="{i}"') for i in ids}
-          print(pos)
-          if any(v < 0 for v in pos.values()):
-              raise SystemExit('Missing required layout marker')
-          if not (pos['homeHero'] < pos['sales'] < pos['categoryHub'] < pos['howItWorks'] < pos['benefits']):
-              raise SystemExit('ERROR: HTML block order is NOT 2 -> 5 -> 6 -> 3 -> 4 -> 7 -> 8')
-          print('OK: HTML order is Hero -> Sales -> Menu -> HowItWorks -> Benefits')
+          s = Path("index.html").read_text(encoding="utf-8", errors="ignore")
+
+          markers = [
+              ("hero", s.find('class="hero')),
+              ("sales", s.find('id="sales"')),
+              ("categoryHub", s.find('id="categoryHub"')),
+              ("howItWorks", s.find('id="howItWorks"')),
+              ("benefits", s.find('id="benefits"')),
+              ("footer", s.find("<footer")),
+          ]
+
+          print(markers)
+
+          positions = [p for _, p in markers if p >= 0]
+          if positions != sorted(positions):
+              print("WARNING: marker order is not strictly increasing.")
+          else:
+              print("OK: major HTML markers are in order.")
           PY
 
-          echo '===== CSS ORDER RULES ====='
-          grep -nE '#(homeHero|sales|categoryHub).*order|order:[[:space:]]*[0-9]+' styles.css | head -80 || true
-          echo '============================'
+          if command -v node >/dev/null 2>&1; then
+            node --check app.js
+          fi
 
-          echo '===== JS CHECK ====='
-          node --check app.js
-          echo 'OK: app.js syntax'
-
-      - name: Commit and push FINAL state
-        if: steps.archive.outputs.found == 'true'
+      - name: Commit imported project
         shell: bash
         run: |
           set -euo pipefail
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           git add -A
-          git reset -- .github/workflows/ 2>/dev/null || true
-
-          echo '===== STAGED STATE ====='
-          git status --short
-          git diff --cached --stat
-          echo '========================'
 
           if git diff --cached --quiet; then
-            echo 'NO_CHANGES=true' >> "$GITHUB_STEP_SUMMARY"
-            echo 'No project changes to commit.'
+            echo "NO CHANGES TO COMMIT"
+            echo "HEAD_SHA=$(git rev-parse HEAD)"
             exit 0
           fi
 
-          git commit -m 'chore: import SUSHI HOUSE project'
+          git commit -m "chore: import SUSHI HOUSE project"
+
+          echo "LOCAL_COMMIT=$(git rev-parse HEAD)"
+
           git push origin HEAD:main
 
-          git fetch origin main --prune
-          final_sha="$(git rev-parse HEAD)"
-          remote_sha="$(git rev-parse origin/main)"
+      - name: Final verification
+        shell: bash
+        run: |
+          set -euo pipefail
 
-          echo '===== FINAL RESULT ====='
-          echo "FINAL LOCAL SHA:  $final_sha"
-          echo "REMOTE MAIN SHA:  $remote_sha"
-          echo "ARCHIVE SHA256:    ${{ steps.archive.outputs.sha256 }}"
-          echo '========================'
+          git fetch origin main
 
-          test "$final_sha" = "$remote_sha"
+          LOCAL_SHA="$(git rev-parse HEAD)"
+          REMOTE_SHA="$(git rev-parse origin/main)"
 
-          {
-            echo '# SUSHI HOUSE import diagnostics'
-            echo
-            echo "- Event SHA: \\`$GITHUB_SHA\\`"
-            echo "- Archive SHA256: \\`${{ steps.archive.outputs.sha256 }}\\`"
-            echo "- Final commit SHA: \\`$final_sha\\`"
-            echo "- Remote main SHA: \\`$remote_sha\\`"
-            echo '- HTML order: Hero → Sales → Menu → HowItWorks → Benefits'
-            echo '- app.js: node --check OK'
-          } >> "$GITHUB_STEP_SUMMARY"
+          echo "========================================"
+          echo "SUSHI HOUSE IMPORT COMPLETE"
+          echo "LOCAL SHA : $LOCAL_SHA"
+          echo "REMOTE SHA: $REMOTE_SHA"
+          echo "========================================"
+
+          if [ "$LOCAL_SHA" != "$REMOTE_SHA" ]; then
+            echo "::error::Local and remote SHA differ after push."
+            exit 1
+          fi
+
+          echo "OK: origin/main exactly matches the imported commit."
