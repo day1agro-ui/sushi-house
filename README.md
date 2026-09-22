@@ -1,9 +1,3 @@
-# SUSHI HOUSE MVP
+# SUSHI HOUSE v3
 
-Mobile-first landing page and ordering UI for SUSHI HOUSE.
-
-## Run locally
-Open `index.html` in a browser.
-
-## Deploy
-Static site: no build command. Publish directory: `.`
+Mobile-first restaurant/order MVP. The GitHub Actions importer protects `.github/workflows/` and is not included in this archive by design.
