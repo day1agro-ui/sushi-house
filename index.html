@@ -61,6 +61,7 @@
 <footer id="contacts"><div class="container footer-grid"><div><div class="brand footer-brand"><span>РОЛЛЫ WOK|ТОМ-ЯМ</span><strong>SUSHI HOUSE</strong></div><p>Вкусные моменты рядом</p><div class="social">●　●　●</div></div><div><h4>Меню</h4><a>Роллы</a><a>Сеты</a><a>Суши</a><a>WOK</a><a>Том-Ям</a><a>Закуски</a><a>Напитки</a></div><div id="about"><h4>Клиентам</h4><a>Доставка</a><a>Акции</a><a>О нас</a><a>Контакты</a><a>Политика конфиденциальности</a></div><div><h4>Новосибирск</h4><p>ул. Примерная, 123</p><p>Ежедневно с 10:00 до 23:00</p><p>+7 (913) 123-45-67</p><button class="primary" onclick="openCart()">🛒 Заказать</button></div></div><div class="container copyright">© 2026 Sushi House. Все права защищены.</div></footer>
 
 <div class="mobile-menu" id="mobileMenu"><a href="#menu">Меню</a><a href="#sales">Акции</a><a href="#delivery">Доставка</a><a href="#about">О нас</a><a href="#contacts">Контакты</a></div>
+<div class="mobile-cart-bar" id="mobileCartBar"><div class="cart-summary">Корзина пока пустая</div><button onclick="mobileCartAction()">Перейти к меню</button></div>
 <div class="cart-overlay" id="cartOverlay" onclick="closeCart(event)"><aside class="cart" onclick="event.stopPropagation()"><div class="cart-head"><h2>Ваш заказ</h2><button onclick="closeCart()">×</button></div><div id="cartItems"></div><div class="cart-total"><span>Итого</span><b id="cartTotal">0 ₽</b></div><button class="primary checkout" onclick="checkout()">Оформить заказ →</button></aside></div>
 <script src="app.js"></script>
 </body></html>
