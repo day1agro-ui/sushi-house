@@ -1,3 +1,9 @@
-# SUSHI HOUSE v3
+# SUSHI HOUSE v4
 
-Mobile-first restaurant/order MVP. The GitHub Actions importer protects `.github/workflows/` and is not included in this archive by design.
+Menu data normalized from the public SUSHI HOUSE website:
+https://sushihouse-nsk.ru/
+
+The project keeps the static GitHub/Render architecture and the existing protected GitHub Actions workflow.
+`menu.json` is the menu data source for this version; `app.js` contains the same snapshot for zero-build static hosting.
+
+Important: verify menu, prices, availability and image usage with the restaurant before accepting real orders.
