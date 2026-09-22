@@ -16,3 +16,7 @@ Mobile-first SUSHI HOUSE landing page.
 
 
 Layout order: header → hero → House Sets / Hot & Spicy → menu → categories → how it works → advantages → footer → sticky cart.
+
+
+## SUSHI HOUSE v17 — Tokyo Premium
+Design layer built on SKELETON v1. Core menu, navigation, cart and quantity logic preserved.
