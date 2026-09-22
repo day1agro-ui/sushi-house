@@ -35,16 +35,34 @@ const MENU_TREE=[
 function findCategory(id){
   for(const c of MENU_TREE){ if(c.id===id)return c; if(c.children){const x=c.children.find(s=>s.id===id); if(x)return x;} }
 }
-function categoryCount(filter){return filter==='popular'?products.filter(p=>p.available).length:products.filter(p=>p.cat===filter).length}
+function categoryCount(filter){
+  if(filter==='popular') return products.filter(p=>p.available).length;
+  if(filter) return products.filter(p=>p.cat===filter).length;
+  return 0;
+}
+function categoryTreeCount(c){
+  if(c.filter) return categoryCount(c.filter);
+  return (c.children||[]).reduce((sum,s)=>sum+categoryCount(s.filter),0);
+}
 function renderCategoryGrid(){
   $('categoryGrid').innerHTML=MENU_TREE.map(c=>`<button class="categoryTile ${c.tone||''}" onclick="openCategory('${c.id}')"><span class="tileIcon">${c.icon}</span><strong>${c.title}</strong><small>${c.sub}</small><em>${categoryCount(c.filter)} позиций</em><span class="tileArrow">→</span></button>`).join('');
 }
 function openCategory(id){
   const c=findCategory(id); if(!c)return;
   if(c.direct){showProducts(c.filter,c.title,c.sub);return;}
-  $('menuHub').hidden=true;$('menuView').hidden=false;$('productsSection').hidden=true;
+  const hub=$('menuHub'), view=$('menuView'), productsSection=$('productsSection');
+  if(!hub || !view || !productsSection){console.error('Menu navigation elements missing');return;}
+  hub.hidden=true;view.hidden=false;productsSection.hidden=true;
   $('menuViewTitle').textContent=c.title;$('menuViewSubtitle').textContent=c.sub;
-  $('subcategoryGrid').innerHTML=c.children.map(s=>`<button class="subcategoryTile" onclick="showProducts('${s.filter}','${s.title}','${s.sub}')"><span>${s.icon}</span><div><strong>${s.title}</strong><small>${s.sub}</small><em>${categoryCount(s.filter)} позиций</em></div><b>→</b></button>`).join('');
+  $('subcategoryGrid').innerHTML=c.children.map((s,i)=>`<button class="subcategoryTile" data-sub-index="${i}"><span>${s.icon}</span><div><strong>${s.title}</strong><small>${s.sub}</small><em>${categoryCount(s.filter)} позиций</em></div><b>→</b></button>`).join('');
+  $('subcategoryGrid').querySelectorAll('.subcategoryTile').forEach((btn,i)=>{
+    btn.addEventListener('click',function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      const s=c.children[i];
+      showProducts(s.filter,s.title,s.sub);
+    });
+  });
   $('menuView').scrollIntoView({behavior:'smooth',block:'start'});
 }
 function backToCategories(){
@@ -77,8 +95,12 @@ function bindMainCategoryCards(){
     const c=findCategory(id);
     if(!c)return;
     const countEl=card.querySelector('.category-count');
-    if(countEl) countEl.textContent=`${categoryCount(c.filter)} позиций`;
-    card.addEventListener('click',()=>openCategory(id));
+    if(countEl) countEl.textContent=`${categoryTreeCount(c)} позиций`;
+    card.addEventListener('click',function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      openCategory(id);
+    });
   });
 }
 document.addEventListener('DOMContentLoaded',()=>{

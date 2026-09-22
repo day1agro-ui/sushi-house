@@ -1,12 +1,12 @@
 <!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SUSHI HOUSE — Роллы, WOK, Том-Ям</title><meta name="description" content="SUSHI HOUSE — роллы, сеты, WOK, том-ям и закуски с доставкой."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="styles.css"></head><body>
 <header><div class="container nav"><a class="brand" href="#top"><small>РОЛЛЫ · WOK · ТОМ-ЯМ</small><b>SUSHI HOUSE</b></a><nav><a href="#menu">Меню</a><a href="#sales">Акции</a><a href="#delivery">Доставка</a><a href="#contacts">Контакты</a></nav><div class="city">⌖ Новосибирск · <strong>+7 999 462-78-91</strong></div><button class="cartTop" onclick="openCart()">🛒 <span>Заказать</span> <b id="cartCount">0</b></button><button class="burger" onclick="toggleMenu()">☰</button></div></header>
 
-<section class="main-menu-categories" id="mainMenuCategories">
+<section class="main-menu-categories" id="menuHub">
   <div class="section-kicker">МЕНЮ</div>
   <h2>Что будем заказывать?</h2>
   <p class="category-lead">Выберите раздел — внутри всё аккуратно разбито по блюдам.</p>
 
-  <div class="category-grid">
+  <div class="category-grid" id="categoryGrid">
     <button class="category-card" data-category="sushi">
       <span class="category-icon">🍣</span><strong>Суши</strong><small>Классические и с начинками</small>
     <em class="category-count"></em></button>
