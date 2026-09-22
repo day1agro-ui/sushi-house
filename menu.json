@@ -143,8 +143,8 @@
       "available": true,
       "emoji": "🍣",
       "source": "sushihouse-nsk.ru",
-      "image": null,
-      "image_original": null
+      "image": "assets/menu/processed/vulkan.webp",
+      "image_original": "generated-test/ui-crop"
     },
     {
       "id": "sh-012",
@@ -156,8 +156,8 @@
       "available": true,
       "emoji": "🍣",
       "source": "sushihouse-nsk.ru",
-      "image": null,
-      "image_original": null
+      "image": "assets/menu/processed/tokio.webp",
+      "image_original": "generated-test/ui-crop"
     },
     {
       "id": "sh-013",
@@ -169,8 +169,8 @@
       "available": true,
       "emoji": "🍣",
       "source": "sushihouse-nsk.ru",
-      "image": null,
-      "image_original": null
+      "image": "assets/menu/processed/philadelphia-lux.webp",
+      "image_original": "generated-test/ui-crop"
     },
     {
       "id": "sh-014",
@@ -196,7 +196,7 @@
       "emoji": "🍣",
       "source": "sushihouse-nsk.ru",
       "image": "assets/menu/processed/philadelphia.webp",
-      "image_original": "manual-test/generated/philadelphia-source.jpeg"
+      "image_original": "generated-test/ui-crop"
     },
     {
       "id": "sh-016",
