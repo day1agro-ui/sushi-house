@@ -1,5 +1,15 @@
-# SUSHI HOUSE v10
+# SUSHI HOUSE v11
 
-Mobile-first SUSHI HOUSE. v10 puts the supplied dark hero artwork first on initial load, moves the menu below the hero, and keeps the compact header with cart/menu controls.
+Mobile-first SUSHI HOUSE landing page.
 
-Menu navigation and GitHub/Render deployment flow are preserved.
+## First-screen order
+1. White sticky header
+2. Dark SUSHI HOUSE hero art + headline + CTA
+3. Menu category grid
+4. Category/product navigation
+
+## Navigation
+- One data-driven category navigation system
+- Unique category IDs
+- Mobile click delegation
+- 83 menu positions preserved

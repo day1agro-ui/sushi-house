@@ -54,3 +54,16 @@ header.siteHeader{position:sticky;top:0;z-index:100;background:#fff;border-botto
   .heroContentV10 .heroBtns{margin-top:25px}
   .heroContentV10 .stats{margin-top:36px}
 }
+
+
+/* v11 — guaranteed landing order: header → dark hero → menu */
+.siteMain{display:flex;flex-direction:column}
+#homeHero{order:1}
+#categoryHub{order:2}
+#menuView{order:3}
+#productsSection{order:4}
+#sales{order:5}
+#delivery{order:6}
+.advantages{order:7}
+.siteMain > #homeHero + #categoryHub{display:block}
+@media(max-width:600px){#homeHero{order:1}#categoryHub{order:2}}
