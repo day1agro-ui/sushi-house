@@ -1,1 +1,93 @@
-1
+name: Import SUSHI HOUSE archive
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  import-project:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Find SUSHI HOUSE archive
+        id: find_archive
+        shell: bash
+        run: |
+          archive="$(find . -maxdepth 1 -type f -name 'sushi-house-*.zip' -print -quit)"
+
+          if [ -n "$archive" ]; then
+            echo "archive=$archive" >> "$GITHUB_OUTPUT"
+            echo "Found archive: $archive"
+          else
+            echo "archive=" >> "$GITHUB_OUTPUT"
+            echo "No SUSHI HOUSE archive found."
+          fi
+
+      - name: Extract project safely
+        if: steps.find_archive.outputs.archive != ''
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          archive="${{ steps.find_archive.outputs.archive }}"
+          tmp="$(mktemp -d)"
+
+          unzip -q "$archive" -d "$tmp"
+
+          # Never import Git metadata or GitHub Actions files from an archive.
+          rm -rf "$tmp/.git" "$tmp/.github"
+
+          mapfile -t dirs < <(find "$tmp" -mindepth 1 -maxdepth 1 -type d -print)
+
+          if [ "${#dirs[@]}" -eq 1 ]; then
+            src="${dirs[0]}"
+          else
+            src="$tmp"
+          fi
+
+          # New archive becomes the new project state.
+          # Old project files absent from the archive are removed.
+          rsync -a --delete \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            "$src"/ ./
+
+          rm -rf "$tmp"
+          rm -f "$archive"
+
+      - name: Protect this bot
+        if: steps.find_archive.outputs.archive != ''
+        shell: bash
+        run: |
+          # Restore the existing workflow before committing.
+          git restore --source=HEAD -- .github/workflows/ 2>/dev/null || true
+
+          # Remove any untracked workflow files from the imported archive.
+          git clean -fd -- .github/workflows/ 2>/dev/null || true
+
+      - name: Commit imported project
+        if: steps.find_archive.outputs.archive != ''
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add .
+          git reset -- .github/workflows/ 2>/dev/null || true
+
+          if git diff --cached --quiet; then
+            echo "No project changes to commit."
+            exit 0
+          fi
+
+          git commit -m "chore: import SUSHI HOUSE project"
+          git push
