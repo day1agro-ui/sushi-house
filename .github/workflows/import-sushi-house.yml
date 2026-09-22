@@ -8,6 +8,12 @@ on:
       - "sushi-house-*.zip"
       - ".github/workflows/import-sushi-house.yml"
   workflow_dispatch:
+    inputs:
+      sync_photos:
+        description: "After importing the site, download/process all real product photos from the old site"
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: write
@@ -19,7 +25,6 @@ concurrency:
 jobs:
   import:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout main
         uses: actions/checkout@v4
@@ -32,214 +37,104 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-
           ARCHIVE="$(find "$GITHUB_WORKSPACE" -maxdepth 1 -type f -name 'sushi-house-*.zip' -printf '%f\n' | sort | tail -n 1)"
-
           if [ -z "$ARCHIVE" ]; then
+            if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.sync_photos }}" = "true" ]; then
+              echo "archive=" >> "$GITHUB_OUTPUT"
+              echo "No archive: photo-only run on current project."
+              exit 0
+            fi
             echo "::error::No sushi-house-*.zip found in repository root."
             exit 1
           fi
-
           echo "archive=$ARCHIVE" >> "$GITHUB_OUTPUT"
           echo "ARCHIVE FOUND: $ARCHIVE"
-          ls -lh "$ARCHIVE"
-          sha256sum "$ARCHIVE"
 
-      - name: Extract archive outside repository
+      - name: Extract archive
         id: extract
+        if: ${{ steps.archive.outputs.archive != '' }}
         shell: bash
         env:
           ARCHIVE: ${{ steps.archive.outputs.archive }}
         run: |
           set -euo pipefail
-
           IMPORT_ROOT="$(mktemp -d /tmp/sushi-house-import-XXXXXX)"
           echo "IMPORT_ROOT=$IMPORT_ROOT" >> "$GITHUB_OUTPUT"
-
           unzip -q "$GITHUB_WORKSPACE/$ARCHIVE" -d "$IMPORT_ROOT"
-
-          echo "=== EXTRACTED FILES ==="
-          find "$IMPORT_ROOT" -maxdepth 4 -type f | sort
 
       - name: Detect project root
         id: root
+        if: ${{ steps.archive.outputs.archive != '' }}
         shell: bash
         env:
           IMPORT_ROOT: ${{ steps.extract.outputs.IMPORT_ROOT }}
         run: |
           set -euo pipefail
-
           ROOT="$IMPORT_ROOT"
-
-          top_dirs=()
-          while IFS= read -r -d '' d; do
-            top_dirs+=("$d")
-          done < <(find "$IMPORT_ROOT" -mindepth 1 -maxdepth 1 -type d -print0)
-
-          top_files=()
-          while IFS= read -r -d '' f; do
-            top_files+=("$f")
-          done < <(find "$IMPORT_ROOT" -mindepth 1 -maxdepth 1 -type f -print0)
-
-          if [ "${#top_dirs[@]}" -eq 1 ] && [ "${#top_files[@]}" -eq 0 ] && [ -f "${top_dirs[0]}/index.html" ]; then
-            ROOT="${top_dirs[0]}"
-          fi
-
-          if [ ! -f "$ROOT/index.html" ]; then
-            echo "::error::index.html not found."
-            find "$IMPORT_ROOT" -type f -name index.html -print
-            exit 1
-          fi
-
+          mapfile -t dirs < <(find "$IMPORT_ROOT" -mindepth 1 -maxdepth 1 -type d)
+          mapfile -t files < <(find "$IMPORT_ROOT" -mindepth 1 -maxdepth 1 -type f)
+          if [ "${#dirs[@]}" -eq 1 ] && [ "${#files[@]}" -eq 0 ] && [ -f "${dirs[0]}/index.html" ]; then ROOT="${dirs[0]}"; fi
+          test -f "$ROOT/index.html"
           echo "root=$ROOT" >> "$GITHUB_OUTPUT"
-          echo "PROJECT ROOT: $ROOT"
 
-      - name: Validate before replacing repository
-        shell: bash
+      - name: Validate project
+        if: ${{ steps.archive.outputs.archive != '' }}
         env:
           ROOT: ${{ steps.root.outputs.root }}
         run: |
           set -euo pipefail
-
-          for file in index.html styles.css app.js menu.json; do
-            if [ ! -f "$ROOT/$file" ]; then
-              echo "::error::Missing required file: $file"
-              exit 1
-            fi
-          done
-
-          echo "=== PROJECT FILES ==="
-          find "$ROOT" -maxdepth 2 -type f | sort
-
-          echo "=== INDEX MARKERS ==="
-          grep -n -E 'id="sales"|id="categoryHub"|id="howItWorks"|id="benefits"|<footer' "$ROOT/index.html" || true
-
-          if command -v node >/dev/null 2>&1; then
-            node --check "$ROOT/app.js"
-          fi
+          for file in index.html styles.css app.js menu.json; do test -f "$ROOT/$file"; done
+          node --check "$ROOT/app.js"
 
       - name: Replace repository project
-        shell: bash
+        if: ${{ steps.archive.outputs.archive != '' }}
         env:
           ROOT: ${{ steps.root.outputs.root }}
+          ARCHIVE: ${{ steps.archive.outputs.archive }}
         run: |
           set -euo pipefail
-
-          # Save the workflow outside the repository.
           mkdir -p /tmp/sushi-house-protected
-          cp "$GITHUB_WORKSPACE/.github/workflows/import-sushi-house.yml" \
-             /tmp/sushi-house-protected/import-sushi-house.yml
-
-          # Remove old project files but protect Git metadata and workflows.
-          find "$GITHUB_WORKSPACE" -mindepth 1 -maxdepth 1 \
-            ! -name '.git' \
-            ! -name '.github' \
-            -exec rm -rf {} +
-
-          # Copy the already-extracted project into the repository.
-          rsync -a --delete \
-            --exclude='.git/' \
-            --exclude='.github/' \
-            "$ROOT/" "$GITHUB_WORKSPACE/"
-
-          # Restore the protected workflow.
+          cp "$GITHUB_WORKSPACE/.github/workflows/import-sushi-house.yml" /tmp/sushi-house-protected/import-sushi-house.yml
+          find "$GITHUB_WORKSPACE" -mindepth 1 -maxdepth 1 ! -name '.git' ! -name '.github' -exec rm -rf {} +
+          rsync -a --delete --exclude='.git/' --exclude='.github/' "$ROOT/" "$GITHUB_WORKSPACE/"
           mkdir -p "$GITHUB_WORKSPACE/.github/workflows"
-          cp /tmp/sushi-house-protected/import-sushi-house.yml \
-             "$GITHUB_WORKSPACE/.github/workflows/import-sushi-house.yml"
+          cp /tmp/sushi-house-protected/import-sushi-house.yml "$GITHUB_WORKSPACE/.github/workflows/import-sushi-house.yml"
+          rm -f "$GITHUB_WORKSPACE/$ARCHIVE"
 
-          # Remove the uploaded archive from the final project.
-          rm -f "$GITHUB_WORKSPACE/${{ steps.archive.outputs.archive }}"
-
-      - name: Verify final repository files
+      - name: Optional bulk photo sync
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.sync_photos == true }}
         shell: bash
         run: |
           set -euo pipefail
+          python3 -m pip install --upgrade pip
+          pip install requests beautifulsoup4 pillow "rembg[cpu]"
+          python3 tools/photo_pipeline.py
+          python3 - <<'PY'
+          import json
+          d=json.load(open('menu.json',encoding='utf-8'))
+          with_images=sum(1 for p in d['products'] if p.get('image'))
+          print(f'PHOTO RESULT: {with_images}/{len(d["products"])} products have images')
+          PY
 
+      - name: Final validation
+        run: |
+          set -euo pipefail
           test -f index.html
           test -f styles.css
           test -f app.js
           test -f menu.json
           test -f .github/workflows/import-sushi-house.yml
-
-          echo "=== FINAL ROOT ==="
-          ls -lah
-
-          echo "=== FINAL INDEX MARKERS ==="
-          grep -n -E 'id="sales"|id="categoryHub"|id="howItWorks"|id="benefits"|<footer' index.html || true
-
-          echo "=== FINAL ORDER CHECK ==="
-          python3 - <<'PY'
-          from pathlib import Path
-
-          s = Path("index.html").read_text(encoding="utf-8", errors="ignore")
-
-          markers = [
-              ("sales", 'id="sales"'),
-              ("categoryHub", 'id="categoryHub"'),
-              ("howItWorks", 'id="howItWorks"'),
-              ("benefits", 'id="benefits"'),
-          ]
-
-          found = []
-          for name, marker in markers:
-              pos = s.find(marker)
-              found.append((name, pos))
-
-          print(found)
-
-          positions = [pos for _, pos in found]
-          if any(pos < 0 for pos in positions):
-              print("WARNING: one or more markers are absent.")
-          elif positions != sorted(positions):
-              print("WARNING: marker order is not sales → categoryHub → howItWorks → benefits.")
-          else:
-              print("OK: expected major block order detected.")
-          PY
-
           node --check app.js
 
       - name: Commit and push
-        shell: bash
         run: |
           set -euo pipefail
-
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
           git add -A
-
           if git diff --cached --quiet; then
             echo "NO CHANGES TO COMMIT"
-            echo "HEAD_SHA=$(git rev-parse HEAD)"
             exit 0
           fi
-
           git commit -m "chore: import SUSHI HOUSE project"
-
-          LOCAL_SHA="$(git rev-parse HEAD)"
-          echo "LOCAL_COMMIT=$LOCAL_SHA"
-
           git push origin HEAD:main
-
-      - name: Final SHA verification
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          git fetch origin main
-
-          LOCAL_SHA="$(git rev-parse HEAD)"
-          REMOTE_SHA="$(git rev-parse origin/main)"
-
-          echo "========================================"
-          echo "SUSHI HOUSE IMPORT COMPLETE"
-          echo "LOCAL SHA : $LOCAL_SHA"
-          echo "REMOTE SHA: $REMOTE_SHA"
-          echo "========================================"
-
-          if [ "$LOCAL_SHA" != "$REMOTE_SHA" ]; then
-            echo "::error::Local and remote SHA differ after push."
-            exit 1
-          fi
-
-          echo "OK: origin/main exactly matches the imported commit."
