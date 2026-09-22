@@ -1,144 +1,29 @@
 <!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SUSHI HOUSE — Роллы, WOK, Том-Ям</title><meta name="description" content="SUSHI HOUSE — роллы, сеты, WOK, том-ям и закуски с доставкой."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="styles.css"></head><body>
-<header><div class="container nav"><a class="brand" href="#top"><small>РОЛЛЫ · WOK · ТОМ-ЯМ</small><b>SUSHI HOUSE</b></a><nav><a href="#menu">Меню</a><a href="#sales">Акции</a><a href="#delivery">Доставка</a><a href="#contacts">Контакты</a></nav><div class="city">⌖ Новосибирск · <strong>+7 999 462-78-91</strong></div><button class="cartTop" onclick="openCart()">🛒 <span>Заказать</span> <b id="cartCount">0</b></button><button class="burger" onclick="toggleMenu()">☰</button></div></header>
+<header><div class="container nav"><a class="brand" href="#top"><small>РОЛЛЫ · WOK · ТОМ-ЯМ</small><b>SUSHI HOUSE</b></a><nav><a href="#categoryHub">Меню</a><a href="#sales">Акции</a><a href="#delivery">Доставка</a><a href="#contacts">Контакты</a></nav><div class="city">⌖ Новосибирск · <strong>+7 999 462-78-91</strong></div><button class="cartTop" onclick="openCart()">🛒 <span>Заказать</span> <b id="cartCount">0</b></button><button class="burger" onclick="toggleMenu()">☰</button></div></header>
 
-<section class="main-menu-categories" id="menuHub">
+<section class="main-menu-categories" id="categoryHub">
   <div class="section-kicker">МЕНЮ</div>
   <h2>Что будем заказывать?</h2>
   <p class="category-lead">Выберите раздел — внутри всё аккуратно разбито по блюдам.</p>
-
-  <div class="category-grid" id="categoryGrid">
-    <button class="category-card" data-category="sushi">
-      <span class="category-icon">🍣</span><strong>Суши</strong><small>Классические и с начинками</small>
-    <em class="category-count"></em></button>
-    <button class="category-card" data-category="sets">
-      <span class="category-icon">🍱</span><strong>Сеты</strong><small>Выгодные наборы</small>
-    <em class="category-count"></em></button>
-    <button class="category-card" data-category="rolls">
-      <span class="category-icon">🥢</span><strong>Роллы</strong><small>Лосось, угорь, креветка и другие</small>
-    <em class="category-count"></em></button>
-    <button class="category-card" data-category="baked">
-      <span class="category-icon">🔥</span><strong>Запечённые</strong><small>Горячие и сытные роллы</small>
-    <em class="category-count"></em></button>
-    <button class="category-card" data-category="hot-rolls">
-      <span class="category-icon">⚡</span><strong>Горячие роллы</strong><small>Темпура и горячая подача</small>
-    <em class="category-count"></em></button>
-    <button class="category-card" data-category="hot">
-      <span class="category-icon">🍜</span><strong>WOK</strong><small>Горячая лапша по-азиатски</small>
-    <em class="category-count"></em></button>
-    <button class="category-card" data-category="soups">
-      <span class="category-icon">🥣</span><strong>Супы</strong><small>Том-Ям, Том-Кха и рамен</small>
-    <em class="category-count"></em></button>
-    <button class="category-card" data-category="salads">
-      <span class="category-icon">🥗</span><strong>Салаты</strong><small>Свежие и лёгкие</small>
-    <em class="category-count"></em></button>
-    <button class="category-card" data-category="hot">
-      <span class="category-icon">🍛</span><strong>Горячие блюда</strong><small>Полноценные блюда</small>
-    <em class="category-count"></em></button>
-    <button class="category-card" data-category="snacks">
-      <span class="category-icon">🍤</span><strong>Закуски</strong><small>Для компании и перекуса</small>
-    <em class="category-count"></em></button>
-    <button class="category-card" data-category="pizza">
-      <span class="category-icon">🍕</span><strong>Пицца</strong><small>Классические вкусы</small>
-    <em class="category-count"></em></button>
-    <button class="category-card" data-category="desserts">
-      <span class="category-icon">🍰</span><strong>Десерты</strong><small>Сладкое к заказу</small>
-    <em class="category-count"></em></button>
-    <button class="category-card" data-category="extras">
-      <span class="category-icon">🥤</span><strong>Дополнительно</strong><small>Соусы, имбирь, васаби и палочки</small>
-    <em class="category-count"></em></button>
-  </div>
+  <div class="category-grid" id="categoryGrid"></div>
 </section>
 <main id="top"><section class="hero"><div class="container heroGrid"><div><span class="kicker">СВЕЖЕЕ · БЫСТРОЕ · ВКУСНОЕ</span><h1>СУШИ, КОТОРЫЕ<br><strong>ХОЧЕТСЯ ПОВТОРИТЬ</strong></h1><p>Роллы, сеты, WOK и горячие блюда. Собираем заказ аккуратно и привозим прямо к вам.</p><div class="heroBtns"><button class="red" onclick="scrollToMenu()">Выбрать блюда →</button><button class="darkBtn" onclick="openCategory('sets')">🔥 Сеты выгоднее</button></div><div class="stats"><div><b>60 мин</b><small>ориентир доставки</small></div><div><b>от 500 ₽</b><small>порог доставки</small></div><div><b>ежедневно</b><small>работаем ежедневно</small></div></div></div><div class="heroArt"><span>🍣</span><i>🍤</i><em>HOUSE<br>FAVORITES</em></div></div></section>
-<section class="container menuHub" id="menu">
-  <div class="menuIntro"><div><span class="kicker dark">МЕНЮ</span><h2>Выберите, что хочется сегодня</h2><p>Всё меню SUSHI HOUSE собрано по понятным разделам.</p></div></div>
-  
-</section>
 <section class="container menuView" id="menuView" hidden>
-  <div class="menuViewHead"><button class="backBtn" onclick="backToCategories()">← Все категории</button><div><span class="kicker dark">РАЗДЕЛ МЕНЮ</span><h2 id="menuViewTitle">Суши</h2><p id="menuViewSubtitle">Выберите категорию</p></div><div class="subcategoryGrid" id="subcategoryGrid"></div>
+  <div class="menuViewHead">
+    <button class="backBtn" id="backToCategories" type="button">← Все категории</button>
+    <div><span class="kicker dark">РАЗДЕЛ МЕНЮ</span><h2 id="menuViewTitle">Суши</h2><p id="menuViewSubtitle">Выберите категорию</p></div>
   </div>
-  
+  <div class="subcategoryGrid" id="subcategoryGrid"></div>
 </section>
-<section class="container products" id="productsSection" hidden><div class="head"><div><span class="kicker dark">MENU</span><h2 id="menuTitle">Популярное</h2><p id="menuSubtitle">То, что чаще всего выбирают наши гости</p></div><button class="link" onclick="showAll()">Всё меню →</button></div><div class="grid" id="productGrid"></div></section>
+<section class="container products" id="productsSection" hidden>
+  <div class="head"><div><span class="kicker dark">MENU</span><h2 id="menuTitle">Популярное</h2><p id="menuSubtitle">То, что чаще всего выбирают наши гости</p></div><button class="link" id="showAllButton" type="button">Всё меню →</button></div>
+  <div class="grid" id="productGrid"></div>
+</section>
 <section class="container promos" id="sales"><article class="promo dark"><div><span class="kicker">HOUSE SETS</span><h2>Сеты<br>выгоднее</h2><p>Любимые сочетания в одном заказе.</p><button class="red" onclick="filterCategory('Сеты')">Смотреть сеты →</button></div><span class="food">🍱</span><b class="sale">до<br>−20%</b></article><article class="promo warm"><div><span class="kicker dark">HOT & SPICY</span><h2>Горячее<br>на вечер</h2><p>WOK и Том-Ям — когда хочется насыщенного вкуса.</p><button class="red" onclick="filterCategory('WOK')">Смотреть WOK →</button></div><span class="food">🍜</span></article></section>
 <section class="container delivery" id="delivery"><span class="kicker dark">HOW IT WORKS</span><h2>Заказ без лишних шагов</h2><div class="steps"><div><i>01</i><b>Выберите</b><small>Соберите блюда в корзину</small></div><div><i>02</i><b>Оформите</b><small>Оставьте контакты и адрес</small></div><div><i>03</i><b>Получите</b><small>Мы приготовим и привезём</small></div></div></section>
 <section class="container advantages"><div>✓ <b>Свежие ингредиенты</b><small>Готовим под заказ</small></div><div>⌁ <b>Быстрая доставка</b><small>Ориентир от 60 минут</small></div><div>₽ <b>Удобная оплата</b><small>Онлайн или при получении</small></div><div>♡ <b>Контроль качества</b><small>Упаковываем аккуратно</small></div></section></main>
 <footer id="contacts"><div class="container footer"><div><div class="brand white"><small>РОЛЛЫ · WOK · ТОМ-ЯМ</small><b>SUSHI HOUSE</b></div><p>Вкусные моменты рядом.</p></div><div><h4>Меню</h4><a onclick="filterCategory('Роллы')">Роллы</a><a onclick="filterCategory('Сеты')">Сеты</a><a onclick="filterCategory('Суши')">Суши</a><a onclick="filterCategory('WOK')">WOK</a><a onclick="filterCategory('Том-Ям')">Том-Ям</a></div><div><h4>Клиентам</h4><a href="#delivery">Доставка</a><a href="#sales">Акции</a><a href="#contacts">Контакты</a></div><div><h4>Новосибирск</h4><p>ул. Дунаевского, 14/1</p><p>Сегодня · 11:00–21:30</p><p><strong>+7 999 462-78-91</strong></p><button class="red" onclick="openCart()">Открыть заказ</button></div></div><div class="copy">© 2026 SUSHI HOUSE</div></footer>
-<div class="mobileMenu" id="mobileMenu"><a href="#menu" onclick="toggleMenu()">Меню</a><a href="#sales" onclick="toggleMenu()">Акции</a><a href="#delivery" onclick="toggleMenu()">Доставка</a><a href="#contacts" onclick="toggleMenu()">Контакты</a></div>
+<div class="mobileMenu" id="mobileMenu"><a href="#categoryHub" onclick="toggleMenu()">Меню</a><a href="#sales" onclick="toggleMenu()">Акции</a><a href="#delivery" onclick="toggleMenu()">Доставка</a><a href="#contacts" onclick="toggleMenu()">Контакты</a></div>
 <div class="overlay" id="cartOverlay" onclick="closeCart(event)"><aside class="cart" onclick="event.stopPropagation()"><div class="cartHead"><div><span class="kicker dark">YOUR ORDER</span><h2>Ваш заказ</h2></div><button onclick="closeCart()">×</button></div><div id="cartItems"></div><div class="total"><span>Итого</span><b id="cartTotal">0 ₽</b></div><button class="red checkout" onclick="checkout()">Перейти к оформлению →</button></aside></div><div class="sticky" onclick="openCart()">🛒 <b id="stickyCount">0</b><strong>Корзина</strong><em id="stickyTotal">0 ₽</em>→</div>
 <script src="app.js"></script>
-<style>
-.main-menu-categories{padding:28px 20px 10px;max-width:1100px;margin:0 auto}
-.section-kicker{font-size:12px;letter-spacing:.18em;color:#999;font-weight:800;margin-bottom:6px}
-.main-menu-categories h2{font-size:32px;line-height:1.05;margin:0 0 7px}
-.category-lead{margin:0 0 20px;color:#777;font-size:15px}
-.category-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.category-card{appearance:none;text-align:left;border:1px solid #e9e9e9;background:#fff;border-radius:20px;padding:18px 15px;min-height:145px;box-shadow:0 8px 24px rgba(0,0,0,.055);cursor:pointer;transition:.18s}
-.category-card:active{transform:scale(.98)}
-.category-icon{display:block;font-size:34px;line-height:1;margin-bottom:17px}
-.category-card strong{display:block;font-size:18px;color:#151515;margin-bottom:5px}
-.category-card small{display:block;color:#8a8a8a;font-size:13px;line-height:1.3}
-@media(min-width:760px){
- .main-menu-categories{padding-left:28px;padding-right:28px}
- .category-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
- .category-card{min-height:155px;padding:22px}
-}
-</style>
-
-
-
-<style>
-.main-menu-categories{padding:28px 20px 24px;max-width:1100px;margin:0 auto}
-.section-kicker{font-size:12px;letter-spacing:.18em;color:#999;font-weight:800;margin-bottom:6px}
-.main-menu-categories h2{font-size:32px;line-height:1.05;margin:0 0 7px}
-.category-lead{margin:0 0 20px;color:#777;font-size:15px}
-.category-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.category-card{appearance:none;text-align:left;border:1px solid #e9e9e9;background:#fff;border-radius:20px;padding:18px 15px;min-height:145px;box-shadow:0 8px 24px rgba(0,0,0,.055);cursor:pointer;transition:.18s}
-.category-card:active{transform:scale(.98)}
-.category-icon{display:block;font-size:34px;line-height:1;margin-bottom:17px}
-.category-card strong{display:block;font-size:18px;color:#151515;margin-bottom:5px}
-.category-card small{display:block;color:#8a8a8a;font-size:13px;line-height:1.3}
-.menuView{padding-top:10px;padding-bottom:20px}
-.subcategoryGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}
-.subcategoryTile{border:1px solid #e8e8e8;background:#fff;border-radius:18px;padding:16px;text-align:left;min-height:105px;box-shadow:0 6px 20px rgba(0,0,0,.05);display:flex;gap:12px;align-items:center}
-.subcategoryTile>span{font-size:30px}
-.subcategoryTile strong{display:block;font-size:16px;color:#151515}
-.subcategoryTile small{display:block;color:#888;margin-top:4px;font-size:12px;line-height:1.3}
-.subcategoryTile em{display:block;color:#aaa;font-size:11px;font-style:normal;margin-top:7px}
-.subcategoryTile>b{margin-left:auto;font-size:22px}
-@media(min-width:760px){
- .main-menu-categories{padding-left:28px;padding-right:28px}
- .category-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
- .category-card{min-height:155px;padding:22px}
- .subcategoryGrid{grid-template-columns:repeat(3,minmax(0,1fr))}
-}
-</style>
-
-
-<style>
-.main-menu-categories{padding:28px 20px 24px;max-width:1100px;margin:0 auto}
-.section-kicker{font-size:12px;letter-spacing:.18em;color:#999;font-weight:800;margin-bottom:6px}
-.main-menu-categories h2{font-size:32px;line-height:1.05;margin:0 0 7px}
-.category-lead{margin:0 0 20px;color:#777;font-size:15px}
-.category-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.category-card{appearance:none;text-align:left;border:1px solid #e9e9e9;background:#fff;border-radius:20px;padding:18px 15px;min-height:145px;box-shadow:0 8px 24px rgba(0,0,0,.055);cursor:pointer;transition:.18s;position:relative}
-.category-card:active{transform:scale(.98)}
-.category-icon{display:block;font-size:34px;line-height:1;margin-bottom:17px}
-.category-card strong{display:block;font-size:18px;color:#151515;margin-bottom:5px}
-.category-card small{display:block;color:#8a8a8a;font-size:13px;line-height:1.3;padding-right:34px}
-.category-card .category-count{display:block;color:#aaa;font-size:11px;font-style:normal;margin-top:10px}
-.subcategoryGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0 30px}
-.subcategoryTile{border:1px solid #e8e8e8;background:#fff;border-radius:18px;padding:16px;text-align:left;min-height:105px;box-shadow:0 6px 20px rgba(0,0,0,.05);display:flex;gap:12px;align-items:center}
-.subcategoryTile>span{font-size:30px}
-.subcategoryTile strong{display:block;font-size:16px;color:#151515}
-.subcategoryTile small{display:block;color:#888;margin-top:4px;font-size:12px;line-height:1.3}
-.subcategoryTile em{display:block;color:#aaa;font-size:11px;font-style:normal;margin-top:7px}
-.subcategoryTile>b{margin-left:auto;font-size:22px}
-@media(min-width:760px){
- .main-menu-categories{padding-left:28px;padding-right:28px}
- .category-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
- .category-card{min-height:155px;padding:22px}
- .subcategoryGrid{grid-template-columns:repeat(3,minmax(0,1fr))}
-}
-</style>
-
 </body></html>

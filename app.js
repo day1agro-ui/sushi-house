@@ -2,108 +2,134 @@ const MENU_PRODUCTS=[{"id":"sh-001","name":"Сяке суши","cat":"Суши",
 const products=MENU_PRODUCTS;
 let cart=[];
 const $=id=>document.getElementById(id);
-const money=n=>n.toLocaleString('ru-RU')+' ₽';
+const money=n=>Number(n).toLocaleString('ru-RU')+' ₽';
 
+// v9: one navigation tree, one event system, no inline category handlers.
 const MENU_TREE=[
-  {id:'popular',title:'Популярное',sub:'То, что выбирают чаще всего',icon:'★',tone:'red',direct:true,filter:'popular'},
+  {id:'popular',title:'Популярное',sub:'Все доступные блюда',icon:'⭐',direct:true,filter:'popular'},
+  {id:'sushi',title:'Суши',sub:'Классические суши',icon:'🍣',children:[
+    {id:'classic-sushi',title:'Классические суши',sub:'Нигири с лососем, креветкой и угрем',icon:'🍣',filter:'Суши'}
+  ]},
   {id:'sets',title:'Сеты',sub:'Выгодные наборы',icon:'🍱',direct:true,filter:'Сеты'},
-  {id:'sushi',title:'Суши',sub:'Классика из риса и рыбы',icon:'🍣',children:[{id:'classic-sushi',title:'Классические суши',sub:'Сяке · Эби · Унаги',icon:'🍣',filter:'Суши'}]},
-  {id:'rolls',title:'Роллы',sub:'Выберите начинку',icon:'🥢',children:[
-    {id:'salmon',title:'С лососем',sub:'Филадельфия и другие',icon:'🐟',filter:'Роллы с лососем'},
-    {id:'eel',title:'С угрём',sub:'Унаги и роллы',icon:'🍣',filter:'Роллы с копченым угрем'},
-    {id:'shrimp',title:'С креветкой',sub:'Эби и темпура',icon:'🍤',filter:'Роллы с креветкой'},
-    {id:'crab',title:'С крабом',sub:'Калифорния и другие',icon:'🦀',filter:'Роллы с крабовым мясом'},
-    {id:'chicken',title:'С курицей',sub:'Сытные роллы',icon:'🍗',filter:'Роллы с куриным филе'},
-    {id:'veg',title:'Вегетарианские',sub:'Без мяса и рыбы',icon:'🥑',filter:'Роллы вегетарианские'}
+  {id:'rolls',title:'Роллы',sub:'Лосось, угорь, креветка и другие',icon:'🥢',children:[
+    {id:'salmon-rolls',title:'С лососем',sub:'Филадельфия, Лава, Аляска и другие',icon:'🐟',filter:'Роллы с лососем'},
+    {id:'eel-rolls',title:'С копчёным угрём',sub:'Унаги и фирменные роллы',icon:'🍣',filter:'Роллы с копченым угрем'},
+    {id:'shrimp-rolls',title:'С креветкой',sub:'Эби, Сенсей и другие',icon:'🍤',filter:'Роллы с креветкой'},
+    {id:'crab-rolls',title:'С крабовым мясом',sub:'Бостон, Калифорния и другие',icon:'🦀',filter:'Роллы с крабовым мясом'},
+    {id:'chicken-rolls',title:'С курицей',sub:'Дакота, Цезарь и Окава',icon:'🍗',filter:'Роллы с куриным филе'},
+    {id:'veg-rolls',title:'Вегетарианские',sub:'Свежие и лёгкие роллы',icon:'🥒',filter:'Роллы вегетарианские'}
   ]},
-  {id:'hot-rolls',title:'Горячие роллы',sub:'Темпура и хруст',icon:'🔥',children:[
-    {id:'baked',title:'Запечённые',sub:'Горячие из печи',icon:'🔥',filter:'Запечённые роллы'},
-    {id:'tempura',title:'Темпура',sub:'Хрустящие роллы',icon:'♨️',filter:'Горячие роллы'}
+  {id:'baked',title:'Запечённые',sub:'Горячие и сытные роллы',icon:'🔥',direct:true,filter:'Запечённые роллы'},
+  {id:'hot-rolls',title:'Горячие роллы',sub:'Темпура и горячая подача',icon:'⚡',direct:true,filter:'Горячие роллы'},
+  {id:'wok',title:'WOK',sub:'Горячие блюда по-азиатски',icon:'🍜',direct:true,filter:'Горячие блюда'},
+  {id:'soups',title:'Супы',sub:'Том-Ям, Том-Кха и рамен',icon:'🥣',children:[
+    {id:'tom-yam',title:'Том-Ям',sub:'Остро-кислый тайский суп',icon:'🌶️',test:p=>/том-ям/i.test(p.name)},
+    {id:'tom-kha',title:'Том-Кха',sub:'Сливочный тайский суп',icon:'🥥',test:p=>/том-кха/i.test(p.name)},
+    {id:'ramen',title:'Рамен',sub:'Японский суп с лапшой',icon:'🍜',test:p=>/рамен/i.test(p.name)}
   ]},
-  {id:'soups',title:'Супы',sub:'Том-ям, том-кха и рамен',icon:'🥣',children:[
-    {id:'tom-yam',title:'Том-Ям',sub:'Креветки · морепродукты · курица',icon:'🥣',filter:'Супы'},
-    {id:'other-soups',title:'Том-Кха и Рамен',sub:'Ещё горячие супы',icon:'🍜',filter:'Супы'}
-  ]},
-  {id:'salads',title:'Салаты и поке',sub:'Лёгкие и сытные',icon:'🥗',direct:true,filter:'Салаты'},
-  {id:'hot',title:'WOK и горячее',sub:'Лапша, рис и терияки',icon:'🍜',direct:true,filter:'Горячие блюда'},
-  {id:'snacks',title:'Закуски',sub:'Дополнения к заказу',icon:'🍤',direct:true,filter:'Закуски'},
-  {id:'pizza',title:'Пицца',sub:'Горячая и сытная',icon:'🍕',direct:true,filter:'Пицца'},
+  {id:'salads',title:'Салаты',sub:'Свежие и лёгкие',icon:'🥗',direct:true,filter:'Салаты'},
+  {id:'hot-dishes',title:'Горячие блюда',sub:'Полноценные блюда',icon:'🍛',direct:true,filter:'Горячие блюда'},
+  {id:'snacks',title:'Закуски',sub:'Для компании и перекуса',icon:'🍤',direct:true,filter:'Закуски'},
+  {id:'pizza',title:'Пицца',sub:'Классические вкусы',icon:'🍕',direct:true,filter:'Пицца'},
   {id:'desserts',title:'Десерты',sub:'Сладкое к заказу',icon:'🍰',direct:true,filter:'Десерты'},
-  {id:'extras',title:'Дополнительно',sub:'Соусы и палочки',icon:'🥢',direct:true,filter:'Сопутствующие товары'}
+  {id:'extras',title:'Дополнительно',sub:'Соусы, имбирь, васаби и палочки',icon:'🥤',direct:true,filter:'Сопутствующие товары'}
 ];
 
 function findCategory(id){
-  for(const c of MENU_TREE){ if(c.id===id)return c; if(c.children){const x=c.children.find(s=>s.id===id); if(x)return x;} }
+  for(const c of MENU_TREE){
+    if(c.id===id)return c;
+    if(c.children){const child=c.children.find(x=>x.id===id);if(child)return child;}
+  }
+  return null;
 }
-function categoryCount(filter){
-  if(filter==='popular') return products.filter(p=>p.available).length;
-  if(filter) return products.filter(p=>p.cat===filter).length;
-  return 0;
+function matches(item, rule){
+  if(!rule)return false;
+  if(rule==='popular')return item.available;
+  if(typeof rule==='function')return rule(item);
+  return item.cat===rule;
 }
-function categoryTreeCount(c){
-  if(c.filter) return categoryCount(c.filter);
-  return (c.children||[]).reduce((sum,s)=>sum+categoryCount(s.filter),0);
+function categoryCount(rule){return products.filter(p=>p.available && matches(p,rule)).length;}
+function treeCount(c){
+  if(c.direct)return categoryCount(c.filter);
+  return (c.children||[]).reduce((sum,ch)=>sum+categoryCount(ch.filter||ch.test),0);
 }
+function escapeHtml(value){return String(value??'').replace(/[&<>'"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));}
+
 function renderCategoryGrid(){
-  $('categoryGrid').innerHTML=MENU_TREE.map(c=>`<button class="categoryTile ${c.tone||''}" onclick="openCategory('${c.id}')"><span class="tileIcon">${c.icon}</span><strong>${c.title}</strong><small>${c.sub}</small><em>${categoryCount(c.filter)} позиций</em><span class="tileArrow">→</span></button>`).join('');
+  const grid=$('categoryGrid');
+  if(!grid)return;
+  grid.innerHTML=MENU_TREE.map(c=>`<button type="button" class="category-card" data-category-id="${c.id}">
+    <span class="category-icon">${c.icon}</span><strong>${escapeHtml(c.title)}</strong><small>${escapeHtml(c.sub)}</small>
+    <em class="category-count">${treeCount(c)} ${treeCount(c)===1?'позиция':'позиций'}</em><span class="tileArrow">→</span>
+  </button>`).join('');
+}
+
+function setView(mode){
+  $('categoryHub').hidden=mode!=='categories';
+  $('menuView').hidden=mode!=='subcategories';
+  $('productsSection').hidden=mode!=='products';
 }
 function openCategory(id){
-  const c=findCategory(id); if(!c)return;
+  const c=findCategory(id);
+  if(!c)return;
   if(c.direct){showProducts(c.filter,c.title,c.sub);return;}
-  const hub=$('menuHub'), view=$('menuView'), productsSection=$('productsSection');
-  if(!hub || !view || !productsSection){console.error('Menu navigation elements missing');return;}
-  hub.hidden=true;view.hidden=false;productsSection.hidden=true;
-  $('menuViewTitle').textContent=c.title;$('menuViewSubtitle').textContent=c.sub;
-  $('subcategoryGrid').innerHTML=c.children.map((s,i)=>`<button class="subcategoryTile" data-sub-index="${i}"><span>${s.icon}</span><div><strong>${s.title}</strong><small>${s.sub}</small><em>${categoryCount(s.filter)} позиций</em></div><b>→</b></button>`).join('');
-  $('subcategoryGrid').querySelectorAll('.subcategoryTile').forEach((btn,i)=>{
-    btn.addEventListener('click',function(e){
-      e.preventDefault();
-      e.stopPropagation();
-      const s=c.children[i];
-      showProducts(s.filter,s.title,s.sub);
-    });
-  });
+  setView('subcategories');
+  $('menuViewTitle').textContent=c.title;
+  $('menuViewSubtitle').textContent=c.sub;
+  const grid=$('subcategoryGrid');
+  grid.innerHTML=(c.children||[]).map((s,i)=>{
+    const rule=s.filter||s.test;
+    const count=categoryCount(rule);
+    return `<button type="button" class="subcategoryTile" data-parent-id="${c.id}" data-sub-index="${i}">
+      <span>${s.icon}</span><div><strong>${escapeHtml(s.title)}</strong><small>${escapeHtml(s.sub)}</small><em>${count} ${count===1?'позиция':'позиций'}</em></div><b>→</b>
+    </button>`;
+  }).join('');
   $('menuView').scrollIntoView({behavior:'smooth',block:'start'});
 }
-function backToCategories(){
-  $('menuView').hidden=true;$('productsSection').hidden=true;$('menuHub').hidden=false;
-  $('menuHub').scrollIntoView({behavior:'smooth',block:'start'});
-}
-function showProducts(filter,title,sub){
-  $('menuHub').hidden=true;$('menuView').hidden=true;$('productsSection').hidden=false;
-  let list=filter==='popular'?products.filter(p=>p.available):products.filter(p=>p.cat===filter);
+function backToCategories(){setView('categories');$('categoryHub').scrollIntoView({behavior:'smooth',block:'start'});}
+function showProducts(rule,title,sub){
+  const list=products.filter(p=>matches(p,rule));
+  setView('products');
   render(list,title,sub);
   $('productsSection').scrollIntoView({behavior:'smooth',block:'start'});
 }
-function render(list=[],title='Популярное',sub='Реальное меню SUSHI HOUSE'){
-  $('menuTitle').textContent=title;$('menuSubtitle').textContent=sub;
-  $('productGrid').innerHTML=list.map(p=>{const i=products.indexOf(p);return `<article class="product ${p.available?'':'sold'}"><div class="productImg">${p.emoji}</div><div class="productBody"><h3>${p.name}</h3><p>${p.desc}</p><div class="meta"><span>${p.weight||' '}</span><strong class="price">${p.available?money(p.price):'Нет в наличии'}</strong></div>${p.available?`<button class="add" onclick="addToCart(${i})">Добавить</button>`:`<button class="add" disabled>Нет в наличии</button>`}</div></article>`}).join('');
+function render(list,title='Популярное',sub='Реальное меню SUSHI HOUSE'){
+  $('menuTitle').textContent=title;
+  $('menuSubtitle').textContent=`${sub} · ${list.length} ${list.length===1?'позиция':'позиций'}`;
+  $('productGrid').innerHTML=list.map(p=>{
+    const i=products.indexOf(p);
+    return `<article class="product ${p.available?'':'sold'}"><div class="productImg">${p.emoji}</div><div class="productBody"><h3>${escapeHtml(p.name)}</h3><p>${escapeHtml(p.desc)}</p><div class="meta"><span>${escapeHtml(p.weight||'')}</span><strong class="price">${p.available?money(p.price):'Нет в наличии'}</strong></div>${p.available?`<button type="button" class="add" data-add-index="${i}">Добавить</button>`:`<button type="button" class="add" disabled>Нет в наличии</button>`}</div></article>`;
+  }).join('') || '<p class="emptyMenu">В этом разделе пока нет доступных позиций.</p>';
 }
-function addToCart(i){if(!products[i].available)return;let x=cart.find(v=>v.product===i);x?x.qty++:cart.push({product:i,qty:1});updateCart()}
-function updateCart(){let count=cart.reduce((s,x)=>s+x.qty,0),total=cart.reduce((s,x)=>s+products[x.product].price*x.qty,0);$('cartCount').textContent=count;$('stickyCount').textContent=count;$('cartTotal').textContent=money(total);$('stickyTotal').textContent=money(total);$('cartItems').innerHTML=cart.length?cart.map((x,i)=>{let p=products[x.product];return `<div class="cartItem"><div class="emoji">${p.emoji}</div><div><b>${p.name}</b><small>${p.weight||''} · ${money(p.price*x.qty)}</small><div class="qty"><button onclick="qty(${i},-1)">−</button><strong>${x.qty}</strong><button onclick="qty(${i},1)">+</button></div></div><button class="remove" onclick="removeItem(${i})">×</button></div>`}).join(''):'<p style="color:#777">Корзина пока пустая. Выберите что-нибудь вкусное 🍣</p>'}
-function qty(i,d){cart[i].qty+=d;if(cart[i].qty<1)cart.splice(i,1);updateCart()}
-function removeItem(i){cart.splice(i,1);updateCart()}
-function openCart(){$('cartOverlay').classList.add('open');updateCart()}
-function closeCart(e){if(!e||e.target===$('cartOverlay'))$('cartOverlay').classList.remove('open')}
-function filterCategory(cat){const map={'Сеты':'sets','Суши':'sushi','Роллы':'rolls','WOK':'hot','Том-Ям':'soups'};openCategory(map[cat]||cat)}
-function showAll(){showProducts('popular','Всё меню','Все доступные блюда SUSHI HOUSE')}
-function scrollToMenu(){$('menu').scrollIntoView({behavior:'smooth'})}
-function toggleMenu(){$('mobileMenu').classList.toggle('open')}
-function bindMainCategoryCards(){
-  document.querySelectorAll('.category-card').forEach(card=>{
-    const id=card.dataset.category;
-    const c=findCategory(id);
-    if(!c)return;
-    const countEl=card.querySelector('.category-count');
-    if(countEl) countEl.textContent=`${categoryTreeCount(c)} позиций`;
-    card.addEventListener('click',function(e){
-      e.preventDefault();
-      e.stopPropagation();
-      openCategory(id);
-    });
-  });
+function addToCart(i){if(!products[i]?.available)return;const x=cart.find(v=>v.product===i);x?x.qty++:cart.push({product:i,qty:1});updateCart();}
+function updateCart(){
+  const count=cart.reduce((s,x)=>s+x.qty,0),total=cart.reduce((s,x)=>s+products[x.product].price*x.qty,0);
+  $('cartCount').textContent=count;$('stickyCount').textContent=count;$('cartTotal').textContent=money(total);$('stickyTotal').textContent=money(total);
+  $('cartItems').innerHTML=cart.length?cart.map((x,i)=>{const p=products[x.product];return `<div class="cartItem"><div class="emoji">${p.emoji}</div><div><b>${escapeHtml(p.name)}</b><small>${escapeHtml(p.weight||'')} · ${money(p.price*x.qty)}</small><div class="qty"><button type="button" data-qty-index="${i}" data-qty-delta="-1">−</button><strong>${x.qty}</strong><button type="button" data-qty-index="${i}" data-qty-delta="1">+</button></div></div><button type="button" class="remove" data-remove-index="${i}">×</button></div>`}).join(''):'<p style="color:#777">Корзина пока пустая. Выберите что-нибудь вкусное 🍣</p>';
 }
+function qty(i,d){if(!cart[i])return;cart[i].qty+=d;if(cart[i].qty<1)cart.splice(i,1);updateCart();}
+function removeItem(i){cart.splice(i,1);updateCart();}
+function openCart(){$('cartOverlay').classList.add('open');updateCart();}
+function closeCart(e){if(!e||e.target===$('cartOverlay'))$('cartOverlay').classList.remove('open');}
+function filterCategory(cat){const map={'Сеты':'sets','Суши':'sushi','Роллы':'rolls','WOK':'wok','Том-Ям':'tom-yam'};const id=map[cat];if(id==='tom-yam'){const c=findCategory('soups');showProducts(c.children[0].test,c.children[0].title,c.children[0].sub);}else if(id)openCategory(id);else showProducts(cat,cat,'');}
+function showAll(){showProducts('popular','Всё меню','Все доступные блюда SUSHI HOUSE');}
+function scrollToMenu(){$('categoryHub').scrollIntoView({behavior:'smooth',block:'start'});}
+function toggleMenu(){$('mobileMenu').classList.toggle('open');}
+function checkout(){alert('Оформление заказа подключим следующим этапом. Корзина сохранена.');}
+
+function bindEvents(){
+  $('categoryGrid').addEventListener('click',e=>{const card=e.target.closest('[data-category-id]');if(!card)return;e.preventDefault();openCategory(card.dataset.categoryId);});
+  $('subcategoryGrid').addEventListener('click',e=>{const btn=e.target.closest('[data-sub-index]');if(!btn)return;e.preventDefault();const parent=findCategory(btn.dataset.parentId);const sub=parent?.children?.[Number(btn.dataset.subIndex)];if(sub)showProducts(sub.filter||sub.test,sub.title,sub.sub);});
+  $('productGrid').addEventListener('click',e=>{const btn=e.target.closest('[data-add-index]');if(btn)addToCart(Number(btn.dataset.addIndex));});
+  $('cartItems').addEventListener('click',e=>{const q=e.target.closest('[data-qty-index]');if(q)qty(Number(q.dataset.qtyIndex),Number(q.dataset.qtyDelta));const r=e.target.closest('[data-remove-index]');if(r)removeItem(Number(r.dataset.removeIndex));});
+  $('backToCategories').addEventListener('click',backToCategories);
+  $('showAllButton').addEventListener('click',showAll);
+}
+
 document.addEventListener('DOMContentLoaded',()=>{
-  bindMainCategoryCards();
+  renderCategoryGrid();
+  bindEvents();
   updateCart();
+  // Keep the first screen clean: category hub is the only menu entry point.
+  setView('categories');
 });
