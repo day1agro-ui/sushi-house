@@ -33,7 +33,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          ARCHIVE="$(find . -maxdepth 1 -type f -name 'sushi-house-*.zip' -printf '%f\n' | sort | tail -n 1)"
+          ARCHIVE="$(find "$GITHUB_WORKSPACE" -maxdepth 1 -type f -name 'sushi-house-*.zip' -printf '%f\n' | sort | tail -n 1)"
 
           if [ -z "$ARCHIVE" ]; then
             echo "::error::No sushi-house-*.zip found in repository root."
@@ -45,85 +45,112 @@ jobs:
           ls -lh "$ARCHIVE"
           sha256sum "$ARCHIVE"
 
-      - name: Extract archive
+      - name: Extract archive outside repository
+        id: extract
         shell: bash
         env:
           ARCHIVE: ${{ steps.archive.outputs.archive }}
         run: |
           set -euo pipefail
 
-          rm -rf .import-tmp
-          mkdir -p .import-tmp
+          IMPORT_ROOT="$(mktemp -d /tmp/sushi-house-import-XXXXXX)"
+          echo "IMPORT_ROOT=$IMPORT_ROOT" >> "$GITHUB_OUTPUT"
 
-          unzip -q "$ARCHIVE" -d .import-tmp
+          unzip -q "$GITHUB_WORKSPACE/$ARCHIVE" -d "$IMPORT_ROOT"
 
-          echo "Archive contents:"
-          find .import-tmp -maxdepth 3 -type f | sort
+          echo "=== EXTRACTED FILES ==="
+          find "$IMPORT_ROOT" -maxdepth 4 -type f | sort
 
       - name: Detect project root
         id: root
         shell: bash
+        env:
+          IMPORT_ROOT: ${{ steps.extract.outputs.IMPORT_ROOT }}
         run: |
           set -euo pipefail
 
-          ROOT=".import-tmp"
+          ROOT="$IMPORT_ROOT"
 
-          # If the ZIP contains one top-level directory, use it as the project root.
-          dirs=()
+          top_dirs=()
           while IFS= read -r -d '' d; do
-            dirs+=("$d")
-          done < <(find .import-tmp -mindepth 1 -maxdepth 1 -type d -print0)
+            top_dirs+=("$d")
+          done < <(find "$IMPORT_ROOT" -mindepth 1 -maxdepth 1 -type d -print0)
 
-          files=()
+          top_files=()
           while IFS= read -r -d '' f; do
-            files+=("$f")
-          done < <(find .import-tmp -mindepth 1 -maxdepth 1 -type f -print0)
+            top_files+=("$f")
+          done < <(find "$IMPORT_ROOT" -mindepth 1 -maxdepth 1 -type f -print0)
 
-          if [ "${#dirs[@]}" -eq 1 ] && [ "${#files[@]}" -eq 0 ] && [ -f "${dirs[0]}/index.html" ]; then
-            ROOT="${dirs[0]}"
+          if [ "${#top_dirs[@]}" -eq 1 ] && [ "${#top_files[@]}" -eq 0 ] && [ -f "${top_dirs[0]}/index.html" ]; then
+            ROOT="${top_dirs[0]}"
           fi
 
           if [ ! -f "$ROOT/index.html" ]; then
-            echo "::error::index.html was not found in extracted archive."
-            find .import-tmp -maxdepth 4 -type f -name 'index.html' -print
+            echo "::error::index.html not found."
+            find "$IMPORT_ROOT" -type f -name index.html -print
             exit 1
           fi
 
           echo "root=$ROOT" >> "$GITHUB_OUTPUT"
           echo "PROJECT ROOT: $ROOT"
 
-      - name: Replace project files
+      - name: Validate before replacing repository
         shell: bash
         env:
           ROOT: ${{ steps.root.outputs.root }}
         run: |
           set -euo pipefail
 
-          # Protect Git metadata and this workflow.
-          cp ".github/workflows/import-sushi-house.yml" /tmp/import-sushi-house.yml
+          for file in index.html styles.css app.js menu.json; do
+            if [ ! -f "$ROOT/$file" ]; then
+              echo "::error::Missing required file: $file"
+              exit 1
+            fi
+          done
 
-          # Remove previous project files, but NEVER remove .git or .github.
-          find . -mindepth 1 -maxdepth 1 \
+          echo "=== PROJECT FILES ==="
+          find "$ROOT" -maxdepth 2 -type f | sort
+
+          echo "=== INDEX MARKERS ==="
+          grep -n -E 'id="sales"|id="categoryHub"|id="howItWorks"|id="benefits"|<footer' "$ROOT/index.html" || true
+
+          if command -v node >/dev/null 2>&1; then
+            node --check "$ROOT/app.js"
+          fi
+
+      - name: Replace repository project
+        shell: bash
+        env:
+          ROOT: ${{ steps.root.outputs.root }}
+        run: |
+          set -euo pipefail
+
+          # Save the workflow outside the repository.
+          mkdir -p /tmp/sushi-house-protected
+          cp "$GITHUB_WORKSPACE/.github/workflows/import-sushi-house.yml" \
+             /tmp/sushi-house-protected/import-sushi-house.yml
+
+          # Remove old project files but protect Git metadata and workflows.
+          find "$GITHUB_WORKSPACE" -mindepth 1 -maxdepth 1 \
             ! -name '.git' \
             ! -name '.github' \
-            ! -name '.import-tmp' \
             -exec rm -rf {} +
 
-          # Copy the extracted project into repository root.
+          # Copy the already-extracted project into the repository.
           rsync -a --delete \
             --exclude='.git/' \
             --exclude='.github/' \
-            "$ROOT/" "./"
+            "$ROOT/" "$GITHUB_WORKSPACE/"
 
-          # Restore protected workflow.
-          mkdir -p ".github/workflows"
-          cp /tmp/import-sushi-house.yml ".github/workflows/import-sushi-house.yml"
+          # Restore the protected workflow.
+          mkdir -p "$GITHUB_WORKSPACE/.github/workflows"
+          cp /tmp/sushi-house-protected/import-sushi-house.yml \
+             "$GITHUB_WORKSPACE/.github/workflows/import-sushi-house.yml"
 
-          # Remove archive and temporary extraction directory.
-          rm -f "${{ steps.archive.outputs.archive }}"
-          rm -rf .import-tmp
+          # Remove the uploaded archive from the final project.
+          rm -f "$GITHUB_WORKSPACE/${{ steps.archive.outputs.archive }}"
 
-      - name: Validate imported project
+      - name: Verify final repository files
         shell: bash
         run: |
           set -euo pipefail
@@ -132,41 +159,46 @@ jobs:
           test -f styles.css
           test -f app.js
           test -f menu.json
+          test -f .github/workflows/import-sushi-house.yml
 
-          echo "=== PROJECT FILES ==="
+          echo "=== FINAL ROOT ==="
           ls -lah
 
-          echo "=== INDEX MARKERS ==="
-          grep -n -E 'hero|sales|categoryHub|menuHub|Как заказать|Преимущества' index.html | head -n 80 || true
+          echo "=== FINAL INDEX MARKERS ==="
+          grep -n -E 'id="sales"|id="categoryHub"|id="howItWorks"|id="benefits"|<footer' index.html || true
 
-          echo "=== ORDER CHECK ==="
+          echo "=== FINAL ORDER CHECK ==="
           python3 - <<'PY'
           from pathlib import Path
+
           s = Path("index.html").read_text(encoding="utf-8", errors="ignore")
 
           markers = [
-              ("hero", s.find('class="hero')),
-              ("sales", s.find('id="sales"')),
-              ("categoryHub", s.find('id="categoryHub"')),
-              ("howItWorks", s.find('id="howItWorks"')),
-              ("benefits", s.find('id="benefits"')),
-              ("footer", s.find("<footer")),
+              ("sales", 'id="sales"'),
+              ("categoryHub", 'id="categoryHub"'),
+              ("howItWorks", 'id="howItWorks"'),
+              ("benefits", 'id="benefits"'),
           ]
 
-          print(markers)
+          found = []
+          for name, marker in markers:
+              pos = s.find(marker)
+              found.append((name, pos))
 
-          positions = [p for _, p in markers if p >= 0]
-          if positions != sorted(positions):
-              print("WARNING: marker order is not strictly increasing.")
+          print(found)
+
+          positions = [pos for _, pos in found]
+          if any(pos < 0 for pos in positions):
+              print("WARNING: one or more markers are absent.")
+          elif positions != sorted(positions):
+              print("WARNING: marker order is not sales → categoryHub → howItWorks → benefits.")
           else:
-              print("OK: major HTML markers are in order.")
+              print("OK: expected major block order detected.")
           PY
 
-          if command -v node >/dev/null 2>&1; then
-            node --check app.js
-          fi
+          node --check app.js
 
-      - name: Commit imported project
+      - name: Commit and push
         shell: bash
         run: |
           set -euo pipefail
@@ -184,11 +216,12 @@ jobs:
 
           git commit -m "chore: import SUSHI HOUSE project"
 
-          echo "LOCAL_COMMIT=$(git rev-parse HEAD)"
+          LOCAL_SHA="$(git rev-parse HEAD)"
+          echo "LOCAL_COMMIT=$LOCAL_SHA"
 
           git push origin HEAD:main
 
-      - name: Final verification
+      - name: Final SHA verification
         shell: bash
         run: |
           set -euo pipefail
