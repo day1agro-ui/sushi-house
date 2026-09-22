@@ -57,7 +57,7 @@ function renderCategoryGrid(){
   const grid=$('categoryGrid');
   if(!grid)return;
   grid.innerHTML=MENU_TREE.map(c=>`<button type="button" class="category-card" data-category-id="${c.id}">
-    <span class="category-icon">${c.icon}</span><strong>${escapeHtml(c.title)}</strong><small>${escapeHtml(c.sub)}</small>
+    <span class="category-icon"><img src="${categoryImage(c.id)}" alt="" loading="lazy"></span><strong>${escapeHtml(c.title)}</strong><small>${escapeHtml(c.sub)}</small>
     <em class="category-count">${treeCount(c)} ${treeCount(c)===1?'позиция':'позиций'}</em><span class="tileArrow">→</span>
   </button>`).join('');
 }
