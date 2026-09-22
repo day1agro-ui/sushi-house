@@ -1,12 +1,5 @@
-# SUSHI HOUSE v9
+# SUSHI HOUSE v10
 
-Clean mobile-first menu navigation for SUSHI HOUSE.
+Mobile-first SUSHI HOUSE. v10 puts the supplied dark hero artwork first on initial load, moves the menu below the hero, and keeps the compact header with cart/menu controls.
 
-## v9 navigation
-- One data-driven category tree.
-- No duplicate category IDs.
-- Main categories open with event delegation, including iPhone taps.
-- Categories with subcategories open a second level.
-- Product counts include only available positions.
-- Menu contains 83 normalized products from the current menu dataset.
-- GitHub Actions / Render deployment flow is preserved.
+Menu navigation and GitHub/Render deployment flow are preserved.

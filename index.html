@@ -1,13 +1,39 @@
 <!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SUSHI HOUSE — Роллы, WOK, Том-Ям</title><meta name="description" content="SUSHI HOUSE — роллы, сеты, WOK, том-ям и закуски с доставкой."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="styles.css"></head><body>
-<header><div class="container nav"><a class="brand" href="#top"><small>РОЛЛЫ · WOK · ТОМ-ЯМ</small><b>SUSHI HOUSE</b></a><nav><a href="#categoryHub">Меню</a><a href="#sales">Акции</a><a href="#delivery">Доставка</a><a href="#contacts">Контакты</a></nav><div class="city">⌖ Новосибирск · <strong>+7 999 462-78-91</strong></div><button class="cartTop" onclick="openCart()">🛒 <span>Заказать</span> <b id="cartCount">0</b></button><button class="burger" onclick="toggleMenu()">☰</button></div></header>
+<header class="siteHeader">
+  <div class="container nav">
+    <a class="brand" href="#top" aria-label="SUSHI HOUSE — на главную">
+      <small>РОЛЛЫ · WOK · ТОМ-ЯМ</small>
+      <b>SUSHI HOUSE</b>
+    </a>
+    <div class="headerActions">
+      <button class="cartTop" type="button" onclick="openCart()" aria-label="Открыть корзину">
+        <svg class="cartSvg" viewBox="0 0 32 28" aria-hidden="true"><path d="M3 4h4l2.4 13.2a2 2 0 0 0 2 1.7h12.7a2 2 0 0 0 1.9-1.4L29 9H8"/><path d="M12 24a1.7 1.7 0 1 0 0 .1M24 24a1.7 1.7 0 1 0 0 .1"/></svg>
+        <b id="cartCount">0</b>
+      </button>
+      <button class="burger" type="button" onclick="toggleMenu()" aria-label="Открыть меню"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
 
+
+<main id="top"><section class="hero hero-v10">
+  <div class="heroArtV10" aria-label="SUSHI HOUSE — фирменный арт">
+    <img src="hero-art.jpg" alt="SUSHI HOUSE — суши и креветка" loading="eager" fetchpriority="high">
+  </div>
+  <div class="container heroContentV10">
+    <span class="kicker">СВЕЖЕЕ · БЫСТРОЕ · ВКУСНОЕ</span>
+    <h1>СУШИ, КОТОРЫЕ<br><strong>ХОЧЕТСЯ ПОВТОРИТЬ</strong></h1>
+    <p>Роллы, сеты, WOK и горячие блюда. Собираем заказ аккуратно и привозим прямо к вам.</p>
+    <div class="heroBtns"><button class="red" onclick="scrollToMenu()">Выбрать блюда →</button><button class="darkBtn" onclick="openCategory('sets')">🔥 Сеты выгоднее</button></div>
+    <div class="stats"><div><b>60 мин</b><small>ориентир доставки</small></div><div><b>от 500 ₽</b><small>порог доставки</small></div><div><b>ежедневно</b><small>работаем ежедневно</small></div></div>
+  </div>
+</section>
 <section class="main-menu-categories" id="categoryHub">
   <div class="section-kicker">МЕНЮ</div>
   <h2>Что будем заказывать?</h2>
   <p class="category-lead">Выберите раздел — внутри всё аккуратно разбито по блюдам.</p>
   <div class="category-grid" id="categoryGrid"></div>
 </section>
-<main id="top"><section class="hero"><div class="container heroGrid"><div><span class="kicker">СВЕЖЕЕ · БЫСТРОЕ · ВКУСНОЕ</span><h1>СУШИ, КОТОРЫЕ<br><strong>ХОЧЕТСЯ ПОВТОРИТЬ</strong></h1><p>Роллы, сеты, WOK и горячие блюда. Собираем заказ аккуратно и привозим прямо к вам.</p><div class="heroBtns"><button class="red" onclick="scrollToMenu()">Выбрать блюда →</button><button class="darkBtn" onclick="openCategory('sets')">🔥 Сеты выгоднее</button></div><div class="stats"><div><b>60 мин</b><small>ориентир доставки</small></div><div><b>от 500 ₽</b><small>порог доставки</small></div><div><b>ежедневно</b><small>работаем ежедневно</small></div></div></div><div class="heroArt"><span>🍣</span><i>🍤</i><em>HOUSE<br>FAVORITES</em></div></div></section>
 <section class="container menuView" id="menuView" hidden>
   <div class="menuViewHead">
     <button class="backBtn" id="backToCategories" type="button">← Все категории</button>
