@@ -73,6 +73,24 @@
     </div>
   </article>
 </div>
+<div class="checkoutOverlay" id="checkoutOverlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="checkoutTitle">
+  <div class="checkoutBackdrop" data-checkout-close></div>
+  <section class="checkoutCard">
+    <button class="checkoutClose" type="button" data-checkout-close aria-label="Закрыть">×</button>
+    <div class="checkoutHead"><span class="kicker dark">YOUR ORDER</span><h2 id="checkoutTitle">Оформление заказа</h2><p>Оставьте контакты и выберите способ получения.</p></div>
+    <form id="checkoutForm" class="checkoutForm">
+      <label>Имя<input id="orderName" name="name" type="text" autocomplete="name" placeholder="Как к вам обращаться" required></label>
+      <label>Телефон<input id="orderPhone" name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="+7 900 000-00-00" required></label>
+      <div class="checkoutChoice"><span>Способ получения</span><div class="choiceGrid"><label class="choice"><input type="radio" name="delivery" value="delivery" checked><span><b>Доставка</b><small>Привезём по адресу</small></span></label><label class="choice"><input type="radio" name="delivery" value="pickup"><span><b>Самовывоз</b><small>Заберу сам</small></span></label></div></div>
+      <label id="addressField">Адрес доставки<input id="orderAddress" name="address" type="text" autocomplete="street-address" placeholder="Улица, дом, квартира"></label>
+      <label>Комментарий<textarea id="orderComment" name="comment" rows="3" placeholder="Например: домофон 25, позвонить за 10 минут"></textarea></label>
+      <div class="checkoutSummary"><div><span>Товары</span><b id="checkoutItemsTotal">0 ₽</b></div><div><span>Доставка</span><b id="checkoutDeliveryTotal">Рассчитаем</b></div><div class="checkoutGrand"><span>Итого</span><strong id="checkoutGrandTotal">0 ₽</strong></div></div>
+      <button class="red checkoutSubmit" type="submit">Подтвердить заказ</button>
+      <p class="checkoutNote">На этом этапе заказ никуда не отправляется — мы только проверяем оформление. Отправку подключим следующим шагом.</p>
+    </form>
+    <div class="checkoutSuccess" id="checkoutSuccess" hidden><div class="successIcon">✓</div><h3>Заказ готов к подтверждению</h3><p>Форма и расчёт заказа работают. Следующим этапом подключим реальную отправку заказа.</p><button class="red" type="button" data-checkout-close>Вернуться</button></div>
+  </section>
+</div>
 <div class="mobileMenu" id="mobileMenu"><a href="#categoryHub" onclick="toggleMenu()">Меню</a><a href="#sales" onclick="toggleMenu()">Акции</a><a href="#delivery" onclick="toggleMenu()">Доставка</a><a href="#contacts" onclick="toggleMenu()">Контакты</a></div>
 <div class="overlay" id="cartOverlay" onclick="closeCart(event)"><aside class="cart" onclick="event.stopPropagation()"><div class="cartHead"><div><span class="kicker dark">YOUR ORDER</span><h2>Ваш заказ</h2></div><button onclick="closeCart()">×</button></div><div id="cartItems"></div><div class="total"><span>Итого</span><b id="cartTotal">0 ₽</b></div><button class="red checkout" onclick="checkout()">Перейти к оформлению →</button></aside></div><div class="sticky" onclick="openCart()">🛒 <b id="stickyCount">0</b><strong>Корзина</strong><em id="stickyTotal">0 ₽</em>→</div>
 <script src="app.js"></script>

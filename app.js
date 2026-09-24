@@ -211,7 +211,44 @@ function filterCategory(cat){const map={'Сеты':'sets','Суши':'sushi','Р
 function showAll(){showProducts('popular','Всё меню','Все доступные блюда SUSHI HOUSE');}
 function scrollToMenu(){$('categoryHub').scrollIntoView({behavior:'smooth',block:'start'});}
 function toggleMenu(){$('mobileMenu').classList.toggle('open');}
-function checkout(){alert('Оформление заказа подключим следующим этапом. Корзина сохранена.');}
+function checkout(){
+  if(!cart.length)return;
+  renderCheckoutSummary();
+  $('checkoutOverlay').classList.add('open');
+  $('checkoutOverlay').setAttribute('aria-hidden','false');
+  $('checkoutForm').hidden=false;
+  $('checkoutSuccess').hidden=true;
+  $('checkoutOverlay').querySelector('#orderName')?.focus({preventScroll:true});
+}
+function closeCheckout(){
+  $('checkoutOverlay').classList.remove('open');
+  $('checkoutOverlay').setAttribute('aria-hidden','true');
+}
+function checkoutTotals(){
+  const itemsTotal=cart.reduce((s,x)=>s+products[x.product].price*x.qty,0);
+  const delivery=$('checkoutForm')?.querySelector('input[name="delivery"]:checked')?.value==='pickup'?0:null;
+  return {itemsTotal,delivery,total:delivery===null?itemsTotal:itemsTotal+delivery};
+}
+function renderCheckoutSummary(){
+  const t=checkoutTotals();
+  $('checkoutItemsTotal').textContent=money(t.itemsTotal);
+  $('checkoutDeliveryTotal').textContent=t.delivery===null?'Рассчитаем':money(t.delivery);
+  $('checkoutGrandTotal').textContent=money(t.total);
+}
+function updateCheckoutDelivery(){
+  const delivery=$('checkoutForm').querySelector('input[name="delivery"]:checked')?.value==='delivery';
+  $('addressField').hidden=!delivery;
+  $('orderAddress').required=delivery;
+  renderCheckoutSummary();
+}
+function submitCheckout(e){
+  e.preventDefault();
+  if(!cart.length)return;
+  if(!e.currentTarget.reportValidity())return;
+  $('checkoutForm').hidden=true;
+  $('checkoutSuccess').hidden=false;
+}
+
 
 function bindEvents(){
   $('categoryGrid').addEventListener('click',e=>{const card=e.target.closest('[data-category-id]');if(!card)return;e.preventDefault();openCategory(card.dataset.categoryId);});
@@ -246,6 +283,9 @@ function bindEvents(){
   });
   document.addEventListener('keydown',e=>{if(e.key==='Escape' && $('productModal').classList.contains('open'))closeProductModal();});
   $('cartItems').addEventListener('click',e=>{const q=e.target.closest('[data-qty-index]');if(q){e.stopPropagation();qty(Number(q.dataset.qtyIndex),Number(q.dataset.qtyDelta));return;}const r=e.target.closest('[data-remove-index]');if(r){e.stopPropagation();removeItem(Number(r.dataset.removeIndex));return;}const preview=e.target.closest('[data-cart-product-preview]');if(preview){openProductModal(Number(preview.dataset.cartProductPreview), true);return;}});
+  $('checkoutOverlay').addEventListener('click',e=>{if(e.target.closest('[data-checkout-close]')||e.target===e.currentTarget.querySelector('.checkoutBackdrop'))closeCheckout();});
+  $('checkoutForm').addEventListener('submit',submitCheckout);
+  $('checkoutForm').querySelectorAll('input[name="delivery"]').forEach(r=>r.addEventListener('change',updateCheckoutDelivery));
   $('backToCategories').addEventListener('click',backToCategories);
   $('showAllButton').addEventListener('click',showAll);
 }
@@ -266,6 +306,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
     renderCategoryGrid();
     bindEvents();
     updateCart();
+    updateCheckoutDelivery();
     setView('categories');
   }catch(error){
     console.error('SUSHI HOUSE menu load failed:',error);
