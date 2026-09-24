@@ -1,0 +1,21 @@
+SUSHI HOUSE — FULL BACKUP
+
+Current state: v52 Telegram order integration
+Repository: day1agro-ui/sushi-house
+Branch: main
+Main site: https://sushi-house-9clk.onrender.com
+Telegram backend: https://sushi-house-telegram.onrender.com
+
+Included:
+- Current frontend code: app.js, index.html, styles.css, menu.json
+- Telegram backend: telegram-server/server.js + package.json
+- Local image assets from the latest photo build
+- hero-art.jpg and category images
+
+IMPORTANT:
+- No Telegram bot token or other secrets are stored in this archive.
+- Product photos that are referenced as external URLs in menu.json are not downloaded into this backup.
+- Do not replace the GitHub project with an archive unless the telegram-server folder is included.
+
+Next work point:
+Check Render logs for sushi-house-telegram while submitting one test order. The /health endpoint currently returns ok=true and telegramConfigured=true, but the order request still returns an error to the frontend.
