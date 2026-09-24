@@ -244,6 +244,76 @@ function initPhoneField(){
   });
 }
 
+
+let addressSuggestTimer=null;
+let addressSuggestAbort=null;
+let addressSuggestions=[];
+
+function clearAddressSuggestions(){
+  const box=$('addressSuggestions');
+  if(!box)return;
+  box.innerHTML='';
+  box.hidden=true;
+  addressSuggestions=[];
+}
+
+function renderAddressSuggestions(items){
+  const box=$('addressSuggestions');
+  if(!box)return;
+  addressSuggestions=items;
+  box.innerHTML=items.map((item,i)=>{
+    const value=String(item.value||'').replace(/"/g,'&quot;');
+    const full=String(item.full||item.value||'').replace(/"/g,'&quot;');
+    return `<button type="button" class="addressSuggestion" data-address-index="${i}" role="option"><strong>${value}</strong>${full&&full!==value?`<small>${full}</small>`:''}</button>`;
+  }).join('');
+  box.hidden=!items.length;
+}
+
+async function fetchAddressSuggestions(query){
+  if(query.trim().length<2){clearAddressSuggestions();return;}
+  if(addressSuggestAbort) addressSuggestAbort.abort();
+  addressSuggestAbort=new AbortController();
+  try{
+    const url=`https://atlorium.com/api/Gar/suggest?query=${encodeURIComponent(query.trim())}&limit=6`;
+    const response=await fetch(url,{signal:addressSuggestAbort.signal,headers:{'Accept':'application/json'}});
+    if(!response.ok)throw new Error(`Address API ${response.status}`);
+    const data=await response.json();
+    renderAddressSuggestions(Array.isArray(data?.suggestions)?data.suggestions:[]);
+  }catch(err){
+    if(err?.name!=='AbortError') clearAddressSuggestions();
+  }
+}
+
+function initAddressAutocomplete(){
+  const input=$('orderAddress'), box=$('addressSuggestions');
+  if(!input||!box)return;
+  input.addEventListener('input',()=>{
+    $('orderKladr').value='';
+    $('orderFias').value='';
+    clearTimeout(addressSuggestTimer);
+    const q=input.value;
+    addressSuggestTimer=setTimeout(()=>fetchAddressSuggestions(q),300);
+  });
+  input.addEventListener('focus',()=>{
+    if(input.value.trim().length>=2) fetchAddressSuggestions(input.value);
+  });
+  box.addEventListener('click',e=>{
+    const item=e.target.closest('[data-address-index]');
+    if(!item)return;
+    const data=addressSuggestions[Number(item.dataset.addressIndex)];
+    if(!data)return;
+    input.value=data.value||data.full||'';
+    $('orderKladr').value=data.codes?.kladr || data.kladr_id || data.address?.kladr_id || '';
+    $('orderFias').value=data.fias_id || data.objectGuid || '';
+    clearAddressSuggestions();
+    input.setCustomValidity('');
+    $('addressHint').textContent=$('orderKladr').value?`Адрес выбран · КЛАДР ${$('orderKladr').value}`:'Адрес выбран';
+  });
+  document.addEventListener('click',e=>{
+    if(!e.target.closest('#addressField'))clearAddressSuggestions();
+  });
+}
+
 function checkout(){
   if(!cart.length)return;
   renderCheckoutSummary();
@@ -323,6 +393,7 @@ function bindEvents(){
   $('checkoutForm').addEventListener('submit',submitCheckout);
   $('checkoutForm').querySelectorAll('input[name="delivery"]').forEach(r=>r.addEventListener('change',updateCheckoutDelivery));
   initPhoneField();
+  initAddressAutocomplete();
   $('backToCategories').addEventListener('click',backToCategories);
   $('showAllButton').addEventListener('click',showAll);
 }
