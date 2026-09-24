@@ -249,3 +249,13 @@ body.modal-open{overflow:hidden;touch-action:none}
   overflow-anchor:none;
   scroll-behavior:auto !important;
 }
+
+/* v45: compact composition with optional expand */
+.productModalComposition[hidden]{display:none!important}
+.productModalComposition div{max-height:4.65em;overflow:hidden;position:relative}
+.productModalComposition div.expanded{max-height:none}
+.compositionToggle{margin-top:9px;padding:0;border:0;background:none;color:#ff3a3f;font:inherit;font-size:12px;font-weight:600;cursor:pointer}
+@media(max-width:700px){
+  .productModalComposition div{max-height:4.65em}
+  .compositionToggle{font-size:12px}
+}

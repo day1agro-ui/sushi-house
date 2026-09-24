@@ -127,8 +127,26 @@ function openProductModal(i, fromCart=false){
   const p=products[i];
   if(!p)return;
   $('productModalTitle').textContent=p.name||'';
-  $('productModalDesc').textContent=p.desc||'Описание блюда уточняется.';
-  $('productModalComposition').textContent=p.composition||p.desc||'—';
+  const descText=(p.desc||'Описание блюда уточняется.').trim();
+  const compositionText=(p.composition||'').trim();
+  $('productModalDesc').textContent=descText;
+  const compositionBox=$('productModalCompositionBox');
+  const compositionEl=$('productModalComposition');
+  const compositionToggle=$('productModalCompositionToggle');
+  const hasDistinctComposition=!!compositionText && compositionText!==descText;
+  compositionBox.hidden=!hasDistinctComposition;
+  compositionToggle.hidden=true;
+  compositionEl.classList.remove('expanded');
+  if(hasDistinctComposition){
+    compositionEl.textContent=compositionText;
+    requestAnimationFrame(()=>{
+      const needsExpand=compositionEl.scrollHeight>compositionEl.clientHeight+2;
+      compositionToggle.hidden=!needsExpand;
+      compositionToggle.textContent='Развернуть';
+    });
+  } else {
+    compositionEl.textContent='';
+  }
   $('productModalWeight').textContent=p.weight||'—';
   $('productModalPrice').textContent=p.available?money(p.price):'Нет в наличии';
   const media=$('productModalImage');
@@ -143,8 +161,10 @@ function openProductModal(i, fromCart=false){
   const modalBody=$('productModal').querySelector('.productModalBody');
   const resetModalScroll=()=>{
     if(!modalBody) return;
-    modalBody.scrollTo(0,0);
+    modalBody.style.scrollBehavior='auto';
     modalBody.scrollTop=0;
+    modalBody.scrollTo({top:0,left:0,behavior:'auto'});
+    if(modalBody.parentElement) modalBody.parentElement.scrollTop=0;
   };
   resetModalScroll();
   $('productModal').classList.add('open');
@@ -204,6 +224,12 @@ function bindEvents(){
     const amount=modalDraftQty;
     addQtyToCart(i,amount);
     closeProductModal();
+  });
+  $('productModalCompositionToggle').addEventListener('click',()=>{
+    const box=$('productModalComposition');
+    const btn=$('productModalCompositionToggle');
+    box.classList.toggle('expanded');
+    btn.textContent=box.classList.contains('expanded')?'Свернуть':'Развернуть';
   });
   $('productModalQty').addEventListener('click',e=>{
     const b=e.target.closest('[data-modal-delta]');
