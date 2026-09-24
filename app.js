@@ -211,6 +211,39 @@ function filterCategory(cat){const map={'Сеты':'sets','Суши':'sushi','Р
 function showAll(){showProducts('popular','Всё меню','Все доступные блюда SUSHI HOUSE');}
 function scrollToMenu(){$('categoryHub').scrollIntoView({behavior:'smooth',block:'start'});}
 function toggleMenu(){$('mobileMenu').classList.toggle('open');}
+
+function formatRussianPhone(value){
+  let digits=String(value||'').replace(/\D/g,'');
+  if(digits.startsWith('8')) digits='7'+digits.slice(1);
+  if(digits.startsWith('7')) digits=digits.slice(1);
+  digits=digits.slice(0,10);
+  let out='+7';
+  if(digits.length) out+=' '+digits.slice(0,3);
+  if(digits.length>3) out+=' '+digits.slice(3,6);
+  if(digits.length>6) out+='-'+digits.slice(6,8);
+  if(digits.length>8) out+='-'+digits.slice(8,10);
+  return out;
+}
+function phoneDigits(value){
+  let digits=String(value||'').replace(/\D/g,'');
+  if(digits.startsWith('8')) digits='7'+digits.slice(1);
+  if(digits.startsWith('7')) return digits;
+  if(digits.length) return '7'+digits.slice(0,10);
+  return '';
+}
+function initPhoneField(){
+  const input=$('orderPhone');
+  if(!input)return;
+  input.addEventListener('input',()=>{
+    input.value=formatRussianPhone(input.value);
+    input.setCustomValidity(phoneDigits(input.value).length===11?'':'Введите полный номер телефона');
+  });
+  input.addEventListener('focus',()=>{
+    if(!input.value) input.value='+7 ';
+    requestAnimationFrame(()=>{try{input.setSelectionRange(input.value.length,input.value.length)}catch(_){}});
+  });
+}
+
 function checkout(){
   if(!cart.length)return;
   renderCheckoutSummary();
@@ -244,6 +277,9 @@ function updateCheckoutDelivery(){
 function submitCheckout(e){
   e.preventDefault();
   if(!cart.length)return;
+  const phone=$('orderPhone');
+  const phoneValue=phoneDigits(phone?.value);
+  if(phone) phone.setCustomValidity(phoneValue.length===11?'':'Введите полный номер телефона');
   if(!e.currentTarget.reportValidity())return;
   $('checkoutForm').hidden=true;
   $('checkoutSuccess').hidden=false;
@@ -286,6 +322,7 @@ function bindEvents(){
   $('checkoutOverlay').addEventListener('click',e=>{if(e.target.closest('[data-checkout-close]')||e.target===e.currentTarget.querySelector('.checkoutBackdrop'))closeCheckout();});
   $('checkoutForm').addEventListener('submit',submitCheckout);
   $('checkoutForm').querySelectorAll('input[name="delivery"]').forEach(r=>r.addEventListener('change',updateCheckoutDelivery));
+  initPhoneField();
   $('backToCategories').addEventListener('click',backToCategories);
   $('showAllButton').addEventListener('click',showAll);
 }
