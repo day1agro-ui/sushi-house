@@ -166,3 +166,46 @@ body.modal-open{overflow:hidden}
 
 body.modal-open{overflow:hidden;touch-action:none}
 .productModalBody{overscroll-behavior:contain}
+
+
+/* v34: robust iOS modal viewport fix — same modal from catalog and cart */
+@media (max-width:700px){
+  .productModal{
+    padding:0;
+    align-items:stretch;
+    overflow:hidden;
+    height:100svh;
+    min-height:100svh;
+    max-height:100svh;
+  }
+  .productModalCard{
+    width:calc(100% - 20px);
+    height:calc(100svh - 20px);
+    max-height:calc(100svh - 20px);
+    margin:10px;
+    min-height:0;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    border-radius:20px;
+  }
+  .productModalImage{
+    height:34svh;
+    min-height:180px;
+    max-height:330px;
+    flex:0 0 auto;
+  }
+  .productModalBody{
+    flex:1 1 auto;
+    min-height:0;
+    height:auto;
+    overflow-y:auto;
+    overflow-x:hidden;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+    padding:22px 18px 24px;
+  }
+  .productModalPurchase{
+    padding-bottom:max(4px, env(safe-area-inset-bottom));
+  }
+}
