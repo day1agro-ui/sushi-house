@@ -165,6 +165,7 @@ body.modal-open{overflow:hidden}
 @media(max-width:700px){.productModalComposition{margin-bottom:14px}.productModalPurchase{grid-template-columns:1fr}.productModalQty{justify-content:center}.productModalQty button{height:42px}}
 
 body.modal-open{overflow:hidden;touch-action:none}
+@media(max-width:700px){body.modal-open:not(.modal-from-cart) .sticky{display:none!important}}
 .productModalBody{overscroll-behavior:contain}
 
 

@@ -123,7 +123,7 @@ function render(list,title='Популярное',sub='Реальное меню
     return `<article class="product ${p.available?'':'sold'}" data-product-card-index="${i}" data-product-index="${i}"><div class="productImg">${p.image ? `<img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" loading="lazy" decoding="async">` : p.emoji}</div><div class="productBody"><h3>${escapeHtml(p.name)}</h3><p>${escapeHtml(p.desc)}</p><div class="meta"><span>${escapeHtml(p.weight||'')}</span><strong class="price">${p.available?money(p.price):'Нет в наличии'}</strong></div><div class="productAction">${p.available?productAction(i):`<button type="button" class="add" disabled>Нет в наличии</button>`}</div></div></article>`;
   }).join('') || '<p class="emptyMenu">В этом разделе пока нет доступных позиций.</p>';
 }
-function openProductModal(i){
+function openProductModal(i, fromCart=false){
   const p=products[i];
   if(!p)return;
   $('productModalTitle').textContent=p.name||'';
@@ -143,12 +143,16 @@ function openProductModal(i){
   $('productModal').classList.add('open');
   $('productModal').setAttribute('aria-hidden','false');
   document.body.classList.add('modal-open');
+  document.body.classList.toggle('modal-from-cart', !!fromCart);
 }
+
 function closeProductModal(){
   $('productModal').classList.remove('open');
   $('productModal').setAttribute('aria-hidden','true');
   document.body.classList.remove('modal-open');
+  document.body.classList.remove('modal-from-cart');
 }
+
 function addToCart(i){addQtyToCart(i,1);}
 function addQtyToCart(i,amount){
   if(!products[i]?.available || amount<1)return;
@@ -198,7 +202,7 @@ function bindEvents(){
     $('productModalAdd').textContent=currentQty?`Добавить ещё · ${money(p.price*modalDraftQty)}`:`Добавить в корзину · ${money(p.price*modalDraftQty)}`;
   });
   document.addEventListener('keydown',e=>{if(e.key==='Escape' && $('productModal').classList.contains('open'))closeProductModal();});
-  $('cartItems').addEventListener('click',e=>{const q=e.target.closest('[data-qty-index]');if(q){e.stopPropagation();qty(Number(q.dataset.qtyIndex),Number(q.dataset.qtyDelta));return;}const r=e.target.closest('[data-remove-index]');if(r){e.stopPropagation();removeItem(Number(r.dataset.removeIndex));return;}const preview=e.target.closest('[data-cart-product-preview]');if(preview){openProductModal(Number(preview.dataset.cartProductPreview));return;}});
+  $('cartItems').addEventListener('click',e=>{const q=e.target.closest('[data-qty-index]');if(q){e.stopPropagation();qty(Number(q.dataset.qtyIndex),Number(q.dataset.qtyDelta));return;}const r=e.target.closest('[data-remove-index]');if(r){e.stopPropagation();removeItem(Number(r.dataset.removeIndex));return;}const preview=e.target.closest('[data-cart-product-preview]');if(preview){openProductModal(Number(preview.dataset.cartProductPreview), true);return;}});
   $('backToCategories').addEventListener('click',backToCategories);
   $('showAllButton').addEventListener('click',showAll);
 }
