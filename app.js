@@ -246,8 +246,8 @@ function initPhoneField(){
 
 
 let addressSuggestTimer=null;
-let addressSuggestAbort=null;
 let addressSuggestions=[];
+let addressJsonpSeq=0;
 
 function clearAddressSuggestions(){
   const box=$('addressSuggestions');
@@ -263,25 +263,59 @@ function renderAddressSuggestions(items){
   addressSuggestions=items;
   box.innerHTML=items.map((item,i)=>{
     const value=String(item.value||'').replace(/"/g,'&quot;');
-    const full=String(item.full||item.value||'').replace(/"/g,'&quot;');
+    const full=String(item.full||'').replace(/"/g,'&quot;');
     return `<button type="button" class="addressSuggestion" data-address-index="${i}" role="option"><strong>${value}</strong>${full&&full!==value?`<small>${full}</small>`:''}</button>`;
   }).join('');
   box.hidden=!items.length;
 }
 
-async function fetchAddressSuggestions(query){
+function normalizeKladrResult(item){
+  const parents=Array.isArray(item.parents)?item.parents:[];
+  const parts=[...parents, item].filter(Boolean);
+  const seen=new Set();
+  const text=parts.map(part=>{
+    const name=String(part.name||'').trim();
+    const type=String(part.typeShort||'').trim();
+    const key=(type+' '+name).toLowerCase();
+    if(!name||seen.has(key))return '';
+    seen.add(key);
+    return type ? `${type} ${name}` : name;
+  }).filter(Boolean).join(', ');
+  return {
+    value:text || String(item.name||''),
+    full:item.zip ? `${item.zip}, ${text || item.name || ''}` : (text || item.name || ''),
+    kladr_id:item.id || ''
+  };
+}
+
+function fetchAddressSuggestions(query){
   if(query.trim().length<2){clearAddressSuggestions();return;}
-  if(addressSuggestAbort) addressSuggestAbort.abort();
-  addressSuggestAbort=new AbortController();
-  try{
-    const url=`https://atlorium.com/api/Gar/suggest?query=${encodeURIComponent(query.trim())}&limit=6`;
-    const response=await fetch(url,{signal:addressSuggestAbort.signal,headers:{'Accept':'application/json'}});
-    if(!response.ok)throw new Error(`Address API ${response.status}`);
-    const data=await response.json();
-    renderAddressSuggestions(Array.isArray(data?.suggestions)?data.suggestions:[]);
-  }catch(err){
-    if(err?.name!=='AbortError') clearAddressSuggestions();
-  }
+  const callbackName=`__sushiKladr_${++addressJsonpSeq}`;
+  const script=document.createElement('script');
+  const cleanup=()=>{
+    try{delete window[callbackName]}catch{}
+    script.remove();
+  };
+  window[callbackName]=(data)=>{
+    const results=Array.isArray(data?.result)?data.result:[];
+    renderAddressSuggestions(results.map(normalizeKladrResult).filter(x=>x.kladr_id||x.value));
+    cleanup();
+  };
+  script.onerror=()=>{clearAddressSuggestions();cleanup();};
+  const params=new URLSearchParams({
+    query:query.trim(),
+    oneString:'1',
+    withParent:'1',
+    limit:'7',
+    token:'51dfe5d42fb2b43e3300006e',
+    key:'86a2c2a06f1b2451a87d05512cc2c3edfdf41969',
+    callback:callbackName
+  });
+  script.src=`https://kladr-api.ru/api.php?${params.toString()}`;
+  document.body.appendChild(script);
+  setTimeout(()=>{
+    if(window[callbackName]){clearAddressSuggestions();cleanup();}
+  },8000);
 }
 
 function initAddressAutocomplete(){
@@ -290,9 +324,10 @@ function initAddressAutocomplete(){
   input.addEventListener('input',()=>{
     $('orderKladr').value='';
     $('orderFias').value='';
+    $('addressHint').textContent='Выберите адрес из подсказок — КЛАДР сохранится автоматически.';
     clearTimeout(addressSuggestTimer);
     const q=input.value;
-    addressSuggestTimer=setTimeout(()=>fetchAddressSuggestions(q),300);
+    addressSuggestTimer=setTimeout(()=>fetchAddressSuggestions(q),350);
   });
   input.addEventListener('focus',()=>{
     if(input.value.trim().length>=2) fetchAddressSuggestions(input.value);
@@ -303,8 +338,8 @@ function initAddressAutocomplete(){
     const data=addressSuggestions[Number(item.dataset.addressIndex)];
     if(!data)return;
     input.value=data.value||data.full||'';
-    $('orderKladr').value=data.codes?.kladr || data.kladr_id || data.address?.kladr_id || '';
-    $('orderFias').value=data.fias_id || data.objectGuid || '';
+    $('orderKladr').value=data.kladr_id||'';
+    $('orderFias').value='';
     clearAddressSuggestions();
     input.setCustomValidity('');
     $('addressHint').textContent=$('orderKladr').value?`Адрес выбран · КЛАДР ${$('orderKladr').value}`:'Адрес выбран';
