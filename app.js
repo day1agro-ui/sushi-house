@@ -141,14 +141,26 @@ function openProductModal(i, fromCart=false){
   const currentQty=cartQty(i);
   add.textContent=p.available?(currentQty?`Добавить ещё · ${money(p.price*modalDraftQty)}`:`Добавить в корзину · ${money(p.price*modalDraftQty)}`):'Нет в наличии';
   const modalBody=$('productModal').querySelector('.productModalBody');
-  if(modalBody) modalBody.scrollTop=0;
+  const resetModalScroll=()=>{
+    if(!modalBody) return;
+    modalBody.scrollTo(0,0);
+    modalBody.scrollTop=0;
+  };
+  resetModalScroll();
   $('productModal').classList.add('open');
   $('productModal').setAttribute('aria-hidden','false');
   document.body.classList.add('modal-open');
   document.body.classList.toggle('modal-from-cart', !!fromCart);
+  resetModalScroll();
   requestAnimationFrame(()=>{
-    if(modalBody) modalBody.scrollTop=0;
+    resetModalScroll();
+    requestAnimationFrame(resetModalScroll);
   });
+  setTimeout(resetModalScroll, 80);
+  const modalImg=modalBody?.parentElement?.querySelector('#productModalImage img');
+  if(modalImg && !modalImg.complete){
+    modalImg.addEventListener('load', resetModalScroll, {once:true});
+  }
 }
 
 function closeProductModal(){

@@ -243,3 +243,9 @@ body.modal-open{overflow:hidden;touch-action:none}
     scroll-padding-bottom:calc(132px + env(safe-area-inset-bottom));
   }
 }
+
+/* v44: prevent iOS Safari from restoring/anchoring the previous modal scroll position */
+.productModalBody{
+  overflow-anchor:none;
+  scroll-behavior:auto !important;
+}
