@@ -209,3 +209,16 @@ body.modal-open{overflow:hidden;touch-action:none}
     padding-bottom:max(4px, env(safe-area-inset-bottom));
   }
 }
+/* v35: light visual controls, large tap zones preserved */
+.productModalQty .qtyHit{
+  font-size:18px;
+  font-weight:400;
+  color:#cfcfcf;
+  opacity:.82;
+  -webkit-tap-highlight-color:transparent;
+}
+.productModalQty .qtyHit:active{background:rgba(255,255,255,.06);opacity:1}
+@media(max-width:700px){
+  .productModalQty .qtyHit{font-size:18px;}
+}
+
