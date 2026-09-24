@@ -126,7 +126,8 @@ function openProductModal(i){
   const p=products[i];
   if(!p)return;
   $('productModalTitle').textContent=p.name||'';
-  $('productModalDesc').textContent=p.desc||'Подробное описание блюда появится здесь.';
+  $('productModalDesc').textContent=p.desc||'Описание блюда уточняется.';
+  $('productModalComposition').textContent=p.composition||p.desc||'—';
   $('productModalWeight').textContent=p.weight||'—';
   $('productModalPrice').textContent=p.available?money(p.price):'Нет в наличии';
   const media=$('productModalImage');
@@ -134,7 +135,8 @@ function openProductModal(i){
   const add=$('productModalAdd');
   add.dataset.productIndex=i;
   add.disabled=!p.available;
-  add.textContent=p.available?(cartQty(i)?`В корзине · ${cartQty(i)} шт. — добавить ещё`:'Добавить в корзину'):'Нет в наличии';
+  $('productModalQtyValue').textContent=cartQty(i);
+  add.textContent=p.available?(cartQty(i)?`Добавить ещё · ${money(p.price)}`:'Добавить в корзину'):'Нет в наличии';
   $('productModal').classList.add('open');
   $('productModal').setAttribute('aria-hidden','false');
   document.body.classList.add('modal-open');
@@ -167,6 +169,7 @@ function bindEvents(){
   $('productGrid').addEventListener('click',e=>{const add=e.target.closest('[data-add-index]');if(add){addToCart(Number(add.dataset.addIndex));return;}const q=e.target.closest('[data-product-qty]');if(q){const i=Number(q.dataset.productQty),d=Number(q.dataset.productDelta);if(d>0)addToCart(i);else{const x=cart.find(v=>v.product===i);if(x){x.qty--;if(x.qty<1)cart.splice(cart.indexOf(x),1);updateCart();}}return;}const card=e.target.closest('[data-product-index]');if(card)openProductModal(Number(card.dataset.productIndex));});
   $('productModal').addEventListener('click',e=>{if(e.target.closest('[data-product-modal-close]'))closeProductModal();});
   $('productModalAdd').addEventListener('click',e=>{const i=Number(e.currentTarget.dataset.productIndex);addToCart(i);openProductModal(i);});
+  $('productModalQty').addEventListener('click',e=>{const b=e.target.closest('[data-modal-delta]');if(!b)return;const i=Number($('productModalAdd').dataset.productIndex);const d=Number(b.dataset.modalDelta);if(d>0){addToCart(i);}else{const x=cart.find(v=>v.product===i);if(x){x.qty--;if(x.qty<1)cart.splice(cart.indexOf(x),1);updateCart();}}openProductModal(i);});
   document.addEventListener('keydown',e=>{if(e.key==='Escape' && $('productModal').classList.contains('open'))closeProductModal();});
   $('cartItems').addEventListener('click',e=>{const q=e.target.closest('[data-qty-index]');if(q){e.stopPropagation();qty(Number(q.dataset.qtyIndex),Number(q.dataset.qtyDelta));return;}const r=e.target.closest('[data-remove-index]');if(r){e.stopPropagation();removeItem(Number(r.dataset.removeIndex));return;}const preview=e.target.closest('[data-cart-product-preview]');if(preview){openProductModal(Number(preview.dataset.cartProductPreview));return;}});
   $('backToCategories').addEventListener('click',backToCategories);
