@@ -232,3 +232,14 @@ body.modal-open{overflow:hidden;touch-action:none}
     scroll-padding-bottom:calc(112px + env(safe-area-inset-bottom));
   }
 }
+
+
+/* v43: modal always opens from top + sticky cart remains visible without covering actions */
+@media (max-width:700px){
+  .sticky{z-index:500!important;}
+  .productModal{z-index:400!important;}
+  .productModalBody{
+    padding-bottom:calc(132px + env(safe-area-inset-bottom)) !important;
+    scroll-padding-bottom:calc(132px + env(safe-area-inset-bottom));
+  }
+}
