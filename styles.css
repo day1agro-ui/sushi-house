@@ -224,3 +224,11 @@ body.modal-open{overflow:hidden;touch-action:none}
   .productModalQty .qtyHit{font-size:18px;}
 }
 
+
+/* v42: reserve space for the always-visible sticky cart on mobile */
+@media (max-width:700px){
+  .productModalBody{
+    padding-bottom:calc(112px + env(safe-area-inset-bottom)) !important;
+    scroll-padding-bottom:calc(112px + env(safe-area-inset-bottom));
+  }
+}
