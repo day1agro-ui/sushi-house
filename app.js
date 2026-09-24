@@ -149,7 +149,7 @@ function updateCart(){
   refreshProductControls();
   const count=cart.reduce((s,x)=>s+x.qty,0),total=cart.reduce((s,x)=>s+products[x.product].price*x.qty,0);
   $('cartCount').textContent=count;$('stickyCount').textContent=count;$('cartTotal').textContent=money(total);$('stickyTotal').textContent=money(total);
-  $('cartItems').innerHTML=cart.length?cart.map((x,i)=>{const p=products[x.product];return `<div class="cartItem"><div class="emoji">${p.image ? `<img src="${escapeHtml(p.image)}" alt="" loading="lazy" decoding="async">` : p.emoji}</div><div><b>${escapeHtml(p.name)}</b><small>${escapeHtml(p.weight||'')} · ${money(p.price*x.qty)}</small><div class="qty"><button type="button" data-qty-index="${i}" data-qty-delta="-1">−</button><strong>${x.qty}</strong><button type="button" data-qty-index="${i}" data-qty-delta="1">+</button></div></div><button type="button" class="remove" data-remove-index="${i}">×</button></div>`}).join(''):'<p style="color:#777">Корзина пока пустая. Выберите что-нибудь вкусное 🍣</p>';
+  $('cartItems').innerHTML=cart.length?cart.map((x,i)=>{const p=products[x.product];return `<div class="cartItem" data-cart-product-index="${x.product}"><button type="button" class="cartProductPreview" data-cart-product-preview="${x.product}" aria-label="Подробнее: ${escapeHtml(p.name)}"><div class="emoji">${p.image ? `<img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" loading="lazy" decoding="async">` : p.emoji}</div><div class="cartProductText"><b>${escapeHtml(p.name)}</b><small>${escapeHtml(p.weight||'')} · ${money(p.price*x.qty)}</small></div></button><div class="qty"><button type="button" data-qty-index="${i}" data-qty-delta="-1">−</button><strong>${x.qty}</strong><button type="button" data-qty-index="${i}" data-qty-delta="1">+</button></div><button type="button" class="remove" data-remove-index="${i}">×</button></div>`}).join(''):'<p style="color:#777">Корзина пока пустая. Выберите что-нибудь вкусное 🍣</p>';
 }
 function qty(i,d){if(!cart[i])return;cart[i].qty+=d;if(cart[i].qty<1)cart.splice(i,1);updateCart();}
 function removeItem(i){cart.splice(i,1);updateCart();}
@@ -168,7 +168,7 @@ function bindEvents(){
   $('productModal').addEventListener('click',e=>{if(e.target.closest('[data-product-modal-close]'))closeProductModal();});
   $('productModalAdd').addEventListener('click',e=>{const i=Number(e.currentTarget.dataset.productIndex);addToCart(i);openProductModal(i);});
   document.addEventListener('keydown',e=>{if(e.key==='Escape' && $('productModal').classList.contains('open'))closeProductModal();});
-  $('cartItems').addEventListener('click',e=>{const q=e.target.closest('[data-qty-index]');if(q)qty(Number(q.dataset.qtyIndex),Number(q.dataset.qtyDelta));const r=e.target.closest('[data-remove-index]');if(r)removeItem(Number(r.dataset.removeIndex));});
+  $('cartItems').addEventListener('click',e=>{const q=e.target.closest('[data-qty-index]');if(q){e.stopPropagation();qty(Number(q.dataset.qtyIndex),Number(q.dataset.qtyDelta));return;}const r=e.target.closest('[data-remove-index]');if(r){e.stopPropagation();removeItem(Number(r.dataset.removeIndex));return;}const preview=e.target.closest('[data-cart-product-preview]');if(preview){openProductModal(Number(preview.dataset.cartProductPreview));return;}});
   $('backToCategories').addEventListener('click',backToCategories);
   $('showAllButton').addEventListener('click',showAll);
 }

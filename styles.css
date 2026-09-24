@@ -144,3 +144,11 @@ body.modal-open{overflow:hidden}
  .productModalInfo{padding:12px 0;margin-bottom:15px}
  .productModalClose{right:10px;top:10px;width:38px;height:38px}
 }
+
+/* v29: product details from cart */
+.cartProductPreview{display:flex;align-items:center;gap:10px;min-width:0;flex:1;text-align:left;background:none;color:#fff;padding:0;border:0;cursor:pointer;font:inherit}
+.cartProductPreview .emoji{flex:0 0 48px}
+.cartProductText{min-width:0}
+.cartProductText b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cartProductPreview:active{opacity:.72}
+@media (hover:hover){.cartProductPreview:hover .cartProductText b{text-decoration:underline;text-underline-offset:3px}}
