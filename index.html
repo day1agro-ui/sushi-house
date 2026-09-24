@@ -55,6 +55,23 @@
 
 <section class="container advantages"><div>✓ <b>Свежие ингредиенты</b><small>Готовим под заказ</small></div><div>⌁ <b>Быстрая доставка</b><small>Ориентир от 60 минут</small></div><div>₽ <b>Удобная оплата</b><small>Онлайн или при получении</small></div><div>♡ <b>Контроль качества</b><small>Упаковываем аккуратно</small></div></section></main>
 <footer id="contacts"><div class="container footer"><div><div class="brand white"><small>РОЛЛЫ · WOK · ТОМ-ЯМ</small><b>SUSHI HOUSE</b></div><p>Вкусные моменты рядом.</p></div><div><h4>Меню</h4><a onclick="filterCategory('Роллы')">Роллы</a><a onclick="filterCategory('Сеты')">Сеты</a><a onclick="filterCategory('Суши')">Суши</a><a onclick="filterCategory('WOK')">WOK</a><a onclick="filterCategory('Том-Ям')">Том-Ям</a></div><div><h4>Клиентам</h4><a href="#delivery">Доставка</a><a href="#sales">Акции</a><a href="#contacts">Контакты</a></div><div><h4>Новосибирск</h4><p>ул. Дунаевского, 14/1</p><p>Сегодня · 11:00–21:30</p><p><strong>+7 999 462-78-91</strong></p><button class="red" onclick="openCart()">Открыть заказ</button></div></div><div class="copy">© 2026 SUSHI HOUSE</div></footer>
+<div class="productModal" id="productModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="productModalTitle">
+  <div class="productModalBackdrop" data-product-modal-close></div>
+  <article class="productModalCard" role="document">
+    <button class="productModalClose" type="button" data-product-modal-close aria-label="Закрыть">×</button>
+    <div class="productModalImage" id="productModalImage"></div>
+    <div class="productModalBody">
+      <span class="kicker dark">SUSHI HOUSE</span>
+      <h2 id="productModalTitle"></h2>
+      <p class="productModalDesc" id="productModalDesc"></p>
+      <div class="productModalInfo">
+        <div><small>Вес</small><strong id="productModalWeight">—</strong></div>
+        <div><small>Цена</small><strong id="productModalPrice">—</strong></div>
+      </div>
+      <button class="red productModalAdd" id="productModalAdd" type="button">Добавить в корзину</button>
+    </div>
+  </article>
+</div>
 <div class="mobileMenu" id="mobileMenu"><a href="#categoryHub" onclick="toggleMenu()">Меню</a><a href="#sales" onclick="toggleMenu()">Акции</a><a href="#delivery" onclick="toggleMenu()">Доставка</a><a href="#contacts" onclick="toggleMenu()">Контакты</a></div>
 <div class="overlay" id="cartOverlay" onclick="closeCart(event)"><aside class="cart" onclick="event.stopPropagation()"><div class="cartHead"><div><span class="kicker dark">YOUR ORDER</span><h2>Ваш заказ</h2></div><button onclick="closeCart()">×</button></div><div id="cartItems"></div><div class="total"><span>Итого</span><b id="cartTotal">0 ₽</b></div><button class="red checkout" onclick="checkout()">Перейти к оформлению →</button></aside></div><div class="sticky" onclick="openCart()">🛒 <b id="stickyCount">0</b><strong>Корзина</strong><em id="stickyTotal">0 ₽</em>→</div>
 <script src="app.js"></script>
