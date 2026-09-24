@@ -136,7 +136,8 @@ function openProductModal(i){
   add.dataset.productIndex=i;
   add.disabled=!p.available;
   $('productModalQtyValue').textContent=cartQty(i);
-  add.textContent=p.available?(cartQty(i)?`Добавить ещё · ${money(p.price)}`:'Добавить в корзину'):'Нет в наличии';
+  const currentQty=cartQty(i);
+  add.textContent=p.available?(currentQty?`Добавить ещё · ${money(p.price*currentQty)}`:'Добавить в корзину'):'Нет в наличии';
   $('productModal').classList.add('open');
   $('productModal').setAttribute('aria-hidden','false');
   document.body.classList.add('modal-open');

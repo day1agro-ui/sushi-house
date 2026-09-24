@@ -132,7 +132,7 @@ body.modal-open{overflow:hidden}
 .productModalInfo div+div{border-left:1px solid #2b2b2b;padding-left:15px}
 .productModalInfo small{display:block;color:#777;font-size:9px;margin-bottom:5px}
 .productModalInfo strong{font-size:18px;color:#fff}
-.productModalAdd{width:100%;min-height:48px}
+.productModalPurchase{display:flex;flex-direction:column;gap:12px}.productModalQty{width:100%;height:58px;display:grid;grid-template-columns:1fr 64px 1fr;align-items:stretch;border:1px solid #333;border-radius:14px;overflow:hidden;background:#181818}.productModalQty .qtyHit{width:100%;height:100%;border:0;background:transparent;color:#fff;font-size:28px;line-height:1;cursor:pointer;touch-action:manipulation}.productModalQty .qtyHit:active{background:#2a2a2a}.productModalQty strong{display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;font-weight:700;border-left:1px solid #2b2b2b;border-right:1px solid #2b2b2b;user-select:none}.productModalAdd{width:100%;min-height:48px}
 @media(max-width:700px){
  .productModal{padding:10px}
  .productModalCard{width:100%;max-height:calc(100vh - 20px);display:block;border-radius:20px}
