@@ -247,7 +247,10 @@ function initPhoneField(){
 
 let addressSuggestTimer=null;
 let addressSuggestions=[];
-let addressJsonpSeq=0;
+let addressAbort=null;
+let addressSelected=false;
+const NOVOSIBIRSK_CITY='Новосибирск';
+const NOVOSIBIRSK_CITY_KLADR='5400000100000';
 
 function clearAddressSuggestions(){
   const box=$('addressSuggestions');
@@ -257,77 +260,79 @@ function clearAddressSuggestions(){
   addressSuggestions=[];
 }
 
+function escapeHtml(value){
+  return String(value||'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\\':'&quot;'}[c]));
+}
+
 function renderAddressSuggestions(items){
   const box=$('addressSuggestions');
   if(!box)return;
   addressSuggestions=items;
   box.innerHTML=items.map((item,i)=>{
-    const value=String(item.value||'').replace(/"/g,'&quot;');
-    const full=String(item.full||'').replace(/"/g,'&quot;');
+    const value=escapeHtml(item.value);
+    const full=escapeHtml(item.full);
     return `<button type="button" class="addressSuggestion" data-address-index="${i}" role="option"><strong>${value}</strong>${full&&full!==value?`<small>${full}</small>`:''}</button>`;
   }).join('');
   box.hidden=!items.length;
 }
 
-function normalizeKladrResult(item){
-  const parents=Array.isArray(item.parents)?item.parents:[];
-  const parts=[...parents, item].filter(Boolean);
-  const seen=new Set();
-  const text=parts.map(part=>{
-    const name=String(part.name||'').trim();
-    const type=String(part.typeShort||'').trim();
-    const key=(type+' '+name).toLowerCase();
-    if(!name||seen.has(key))return '';
-    seen.add(key);
-    return type ? `${type} ${name}` : name;
-  }).filter(Boolean).join(', ');
+function normalizeNominatimResult(item){
+  const a=item.address||{};
+  const road=a.road||a.pedestrian||a.cycleway||a.footway||'';
+  const house=a.house_number||'';
+  if(!road)return null;
+  const value=[road,house].filter(Boolean).join(', ');
+  const full=[value,a.postcode].filter(Boolean).join(', ');
   return {
-    value:text || String(item.name||''),
-    full:item.zip ? `${item.zip}, ${text || item.name || ''}` : (text || item.name || ''),
-    kladr_id:item.id || ''
+    value,
+    full,
+    kladr_id:NOVOSIBIRSK_CITY_KLADR,
+    city:NOVOSIBIRSK_CITY,
+    osm_id:item.osm_id||'',
+    osm_type:item.osm_type||''
   };
 }
 
-function fetchAddressSuggestions(query){
-  if(query.trim().length<2){clearAddressSuggestions();return;}
-  const callbackName=`__sushiKladr_${++addressJsonpSeq}`;
-  const script=document.createElement('script');
-  const cleanup=()=>{
-    try{delete window[callbackName]}catch{}
-    script.remove();
-  };
-  window[callbackName]=(data)=>{
-    const results=Array.isArray(data?.result)?data.result:[];
-    renderAddressSuggestions(results.map(normalizeKladrResult).filter(x=>x.kladr_id||x.value));
-    cleanup();
-  };
-  script.onerror=()=>{clearAddressSuggestions();cleanup();};
-  const params=new URLSearchParams({
-    query:query.trim(),
-    oneString:'1',
-    withParent:'1',
-    limit:'7',
-    token:'51dfe5d42fb2b43e3300006e',
-    key:'86a2c2a06f1b2451a87d05512cc2c3edfdf41969',
-    callback:callbackName
-  });
-  script.src=`https://kladr-api.ru/api.php?${params.toString()}`;
-  document.body.appendChild(script);
-  setTimeout(()=>{
-    if(window[callbackName]){clearAddressSuggestions();cleanup();}
-  },8000);
+async function fetchAddressSuggestions(query){
+  const q=query.trim();
+  if(q.length<2){clearAddressSuggestions();return;}
+  if(addressAbort)addressAbort.abort();
+  addressAbort=new AbortController();
+  try{
+    const params=new URLSearchParams({
+      q:`${q}, ${NOVOSIBIRSK_CITY}, Россия`,
+      format:'jsonv2',
+      addressdetails:'1',
+      limit:'8',
+      countrycodes:'ru',
+      layer:'address',
+      viewbox:'82.45,55.20,83.35,54.75',
+      bounded:'1',
+      'accept-language':'ru'
+    });
+    const res=await fetch(`https://nominatim.openstreetmap.org/search?${params.toString()}`,{signal:addressAbort.signal,headers:{Accept:'application/json'}});
+    if(!res.ok)throw new Error(`HTTP ${res.status}`);
+    const data=await res.json();
+    const items=data.map(normalizeNominatimResult).filter(Boolean).filter(x=>x.city===NOVOSIBIRSK_CITY);
+    renderAddressSuggestions(items);
+  }catch(err){
+    if(err?.name!=='AbortError') clearAddressSuggestions();
+  }
 }
 
 function initAddressAutocomplete(){
   const input=$('orderAddress'), box=$('addressSuggestions');
   if(!input||!box)return;
   input.addEventListener('input',()=>{
+    addressSelected=false;
+    input.setCustomValidity('Выберите адрес из подсказок');
     $('orderKladr').value='';
     $('orderFias').value='';
-    $('addressHint').textContent='Выберите адрес из подсказок — КЛАДР сохранится автоматически.';
+    $('orderCityKladr').value=NOVOSIBIRSK_CITY_KLADR;
+    $('addressHint').textContent='Начните вводить улицу или дом.';
     clearTimeout(addressSuggestTimer);
     const q=input.value;
-    addressSuggestTimer=setTimeout(()=>fetchAddressSuggestions(q),350);
+    addressSuggestTimer=setTimeout(()=>fetchAddressSuggestions(q),450);
   });
   input.addEventListener('focus',()=>{
     if(input.value.trim().length>=2) fetchAddressSuggestions(input.value);
@@ -338,11 +343,13 @@ function initAddressAutocomplete(){
     const data=addressSuggestions[Number(item.dataset.addressIndex)];
     if(!data)return;
     input.value=data.value||data.full||'';
-    $('orderKladr').value=data.kladr_id||'';
+    addressSelected=true;
+    input.setCustomValidity('');
+    $('orderKladr').value=data.kladr_id||NOVOSIBIRSK_CITY_KLADR;
+    $('orderCityKladr').value=NOVOSIBIRSK_CITY_KLADR;
     $('orderFias').value='';
     clearAddressSuggestions();
-    input.setCustomValidity('');
-    $('addressHint').textContent=$('orderKladr').value?`Адрес выбран · КЛАДР ${$('orderKladr').value}`:'Адрес выбран';
+    $('addressHint').textContent='Адрес выбран.';
   });
   document.addEventListener('click',e=>{
     if(!e.target.closest('#addressField'))clearAddressSuggestions();

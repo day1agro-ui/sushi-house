@@ -84,12 +84,12 @@
       <div class="checkoutChoice"><span>Способ получения</span><div class="choiceGrid"><label class="choice"><input type="radio" name="delivery" value="delivery" checked><span><b>Доставка</b><small>Привезём по адресу</small></span></label><label class="choice"><input type="radio" name="delivery" value="pickup"><span><b>Самовывоз</b><small>Заберу сам</small></span></label></div></div>
       <div class="addressAutocomplete" id="addressField">
         <label>Адрес доставки
-          <input id="orderAddress" name="address" type="text" autocomplete="street-address" placeholder="Начните вводить город, улицу или дом" required>
+          <input id="orderAddress" name="address" type="text" autocomplete="street-address" placeholder="Улица, дом, квартира" required>
         </label>
-        <input id="orderKladr" name="kladr_id" type="hidden">
+        <input id="orderKladr" name="kladr_id" type="hidden"><input id="orderCity" name="city" type="hidden" value="Новосибирск"><input id="orderCityKladr" name="city_kladr_id" type="hidden" value="5400000100000">
         <input id="orderFias" name="fias_id" type="hidden">
         <div class="addressSuggestions" id="addressSuggestions" role="listbox" hidden></div>
-        <small class="addressHint" id="addressHint">Выберите адрес из подсказок — мы сохраним КЛАДР/ФИАС автоматически.</small>
+        <small class="addressHint" id="addressHint">Введите улицу и дом.</small>
       </div>
       <label>Комментарий<textarea id="orderComment" name="comment" rows="3" placeholder="Например: домофон 25, позвонить за 10 минут"></textarea></label>
       <div class="checkoutSummary"><div><span>Товары</span><b id="checkoutItemsTotal">0 ₽</b></div><div><span>Доставка</span><b id="checkoutDeliveryTotal">Рассчитаем</b></div><div class="checkoutGrand"><span>Итого</span><strong id="checkoutGrandTotal">0 ₽</strong></div></div>
