@@ -386,15 +386,65 @@ function updateCheckoutDelivery(){
   $('orderAddress').required=delivery;
   renderCheckoutSummary();
 }
-function submitCheckout(e){
+const TELEGRAM_SERVER_URL='https://sushi-house-telegram.onrender.com';
+
+async function submitCheckout(e){
   e.preventDefault();
   if(!cart.length)return;
+  const form=e.currentTarget;
   const phone=$('orderPhone');
   const phoneValue=phoneDigits(phone?.value);
   if(phone) phone.setCustomValidity(phoneValue.length===11?'':'Введите полный номер телефона');
-  if(!e.currentTarget.reportValidity())return;
-  $('checkoutForm').hidden=true;
-  $('checkoutSuccess').hidden=false;
+  const delivery=form.querySelector('input[name="delivery"]:checked')?.value==='delivery';
+  const address=$('orderAddress');
+  if(delivery && !addressSelected) address.setCustomValidity('Выберите адрес из подсказок');
+  else address.setCustomValidity('');
+  if(!form.reportValidity())return;
+
+  const totals=checkoutTotals();
+  const items=cart.map(x=>({
+    name:products[x.product]?.name||'',
+    qty:x.qty,
+    price:products[x.product]?.price||0
+  }));
+  const payload={
+    name:$('orderName').value.trim(),
+    phone:phoneValue,
+    delivery:delivery?'delivery':'pickup',
+    city:NOVOSIBIRSK_CITY,
+    city_kladr_id:NOVOSIBIRSK_CITY_KLADR,
+    address:delivery?address.value.trim():'',
+    kladr_id:delivery?($('orderKladr').value||NOVOSIBIRSK_CITY_KLADR):NOVOSIBIRSK_CITY_KLADR,
+    fias_id:delivery?$('orderFias').value.trim():'',
+    comment:$('orderComment').value.trim(),
+    items,
+    total:totals.total
+  };
+
+  const submitButton=form.querySelector('.checkoutSubmit');
+  const originalText=submitButton?.textContent||'Подтвердить заказ';
+  if(submitButton){submitButton.disabled=true;submitButton.textContent='Отправляем заказ…';}
+
+  try{
+    const response=await fetch(`${TELEGRAM_SERVER_URL}/api/order`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(payload)
+    });
+    let data=null;
+    try{data=await response.json();}catch(_){}
+    if(!response.ok || !data?.ok) throw new Error(data?.error||`HTTP ${response.status}`);
+
+    form.hidden=true;
+    $('checkoutSuccess').hidden=false;
+    cart=[];
+    updateCart();
+  }catch(err){
+    console.error('Order submit failed',err);
+    alert('Не удалось отправить заказ. Проверьте интернет и попробуйте ещё раз.');
+  }finally{
+    if(submitButton){submitButton.disabled=false;submitButton.textContent=originalText;}
+  }
 }
 
 
